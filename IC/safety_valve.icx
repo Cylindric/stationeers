@@ -1,0 +1,54 @@
+# SAFETY VALVE
+# ============
+#
+# This code can be used to protect a pipe network
+# from exploding due to over-pressure conditions.
+# 
+# The pressure of the system is read from an attached pressure-reading
+# device such as a Pipe Analyser or a Tank.
+#
+# On an over-pressure event, the dump valve is "enabled" venting the
+# system down to save levels, and the feed valve is "disabled" 
+# preventing further pressure increases.
+#
+# On an under-pressure event, the dump valve is "disabled", and the
+# feed valve is enabled, allowing the system to rise in pressure.
+#
+# Attach the following devices to the IC Socket:
+#   D0 - Pressure sensor (either a Pipe Analyser or a Tank)
+#   D1 - Dump valve (a Pressure Regulator or Digital Valve)
+#   D2 - Feed valve (the valve or mixer that is causing the over-pressure)
+#   D3 - Over-Pressure Indicator (something like a Light)
+#   D4 - Under-Pressure Indicator (something like a Light)
+
+
+use loop
+
+alias PressureSensor d0
+alias DumpValve d1
+alias FeedValve d2
+alias OverPressureIndicator d3
+alias UnderPressureIndicator d4
+
+const MaxPressure = 9000.0
+const MinPressure = 8500.0
+
+
+# Read current pressure value
+var CurrentPressure = PressureSensor.Pressure
+
+# If pressure is high, open dump valve
+if CurrentPressure > MaxPressure
+    DumpValve.On = 1
+    FeedValve.On = 0
+    OverPressureIndicator.On = 1
+    UnderPressureIndicator.On = 0
+end
+
+# If pressure is low, close dump valve
+if CurrentPressure < MinPressure
+    DumpValve.On = 0
+    FeedValve.On = 1
+    OverPressureIndicator.On = 0
+    UnderPressureIndicator.On = 1
+end

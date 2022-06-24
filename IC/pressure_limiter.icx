@@ -1,0 +1,24 @@
+# Disables the attached device if the pressure
+# goes ABOVE the set amount
+
+use loop
+
+alias PressureSensor d0
+alias Device d1
+alias AlertIndicator d2
+
+const MaxPressure = 9000.0
+const MinPressure = 8500.0
+
+# Read current pressure value
+var CurrentPressure = PressureSensor.Pressure
+
+# If pressure is high, disable the device
+if CurrentPressure > MaxPressure
+    Device.On = 0
+end 
+
+# If pressure is low, enable the device
+if CurrentPressure < MinPressure
+    Device.On = 1
+end
