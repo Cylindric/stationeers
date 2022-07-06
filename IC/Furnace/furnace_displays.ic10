@@ -1,0 +1,85 @@
+alias Pmin r0
+alias Pmax r1
+alias Tmin r2
+alias Tmax r3
+alias Hash r4
+alias SelectedItem r5
+alias HashSelector d0
+alias PminDisplay d1
+alias TminDisplay d2
+alias PmaxDisplay d3
+alias TmaxDisplay d4
+move Pmin 0
+move Pmax 0
+move Tmin 0
+move Tmax 0
+move Hash 0
+s PminDisplay Mode 0
+s PmaxDisplay Mode 0
+s TminDisplay Mode 0
+s TmaxDisplay Mode 0
+start:
+move Pmax 100000
+move Tmax 100000
+l SelectedItem HashSelector Setting
+brne SelectedItem 0 4
+move Hash -1301215609
+move Pmin 100
+move Tmin 580
+brne SelectedItem 1 4
+move Hash -654790771
+move Pmin 1000
+move Tmin 900
+brne SelectedItem 2 6
+move Hash -297990285
+move Pmin 18000
+move Pmax 20000
+move Tmin 1200
+move Tmax 1500
+brne SelectedItem 3 5
+move Hash -82508479
+move Pmin 1000
+move Tmin 350
+move Tmax 550
+brne SelectedItem 4 5
+move Hash 502280180
+move Pmin 800
+move Pmax 2400
+move Tmin 600
+brne SelectedItem 5 5
+move Hash 1058547521
+move Pmin 20000
+move Tmin 1000
+move Tmax 10000
+brne SelectedItem 6 5
+move Hash 156348098
+move Pmin 50000
+move Tmin 400
+move Tmax 800
+brne SelectedItem 7 5
+move Hash -787796599
+move Pmin 23500
+move Pmax 24000
+move Tmin 600
+brne SelectedItem 8 5
+move Hash 412924554
+move Pmin 30000
+move Pmax 40000
+move Tmin 1000
+brne SelectedItem 9 6
+move Hash 1579842814
+move Pmin 25000
+move Pmax 30000
+move Tmin 905
+move Tmax 1000000
+brne SelectedItem 10 5
+move Hash -1897868623
+move Pmin 10000
+move Pmax 20000
+move Tmin 1800
+s db Setting Hash
+s PminDisplay Setting Pmin
+s PmaxDisplay Setting Pmax
+s TminDisplay Setting Tmin
+s TmaxDisplay Setting Tmax
+j start

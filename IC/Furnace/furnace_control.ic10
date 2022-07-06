@@ -1,0 +1,116 @@
+start:
+l r6 d0 Setting
+s db Setting r5
+move r1 100000
+move r3 100000
+l r7 d1 Setting
+brne r7 0 4
+move r4 -1301215609
+move r0 100
+move r2 1000
+brne r7 1 4
+move r4 -654790771
+move r0 1000
+move r2 900
+brne r7 2 6
+move r4 -297990285
+move r0 18000
+move r1 20000
+move r2 1200
+move r3 1500
+brne r7 3 5
+move r4 -82508479
+move r0 1000
+move r2 350
+move r3 550
+brne r7 4 5
+move r4 502280180
+move r0 800
+move r1 2400
+move r2 600
+brne r7 5 5
+move r4 1058547521
+move r0 20000
+move r2 1000
+move r3 10000
+brne r7 6 5
+move r4 156348098
+move r0 50000
+move r2 400
+move r3 800
+brne r7 7 5
+move r4 -787796599
+move r0 23500
+move r1 24000
+move r2 600
+brne r7 8 5
+move r4 412924554
+move r0 30000
+move r1 40000
+move r2 1000
+brne r7 9 6
+move r4 1579842814
+move r0 25000
+move r1 30000
+move r2 905
+move r3 1000000
+brne r7 10 5
+move r4 -1897868623
+move r0 10000
+move r1 20000
+move r2 1800
+move r5 0
+seq r15 r6 1
+beqz r15 if0exit
+s d3 On 0
+s d4 On 0
+s d2 SettingOutput 100
+move r5 999
+j start
+if0exit:
+l r8 d2 Temperature
+l r9 d2 Pressure
+l r10 d2 RecipeHash
+s d2 SettingOutput 0
+seq r15 r10 r4
+beqz r15 if1else
+s d2 Open 1
+add r5 r5 100
+j if1exit
+if1else:
+s d2 Open 0
+if1exit:
+sgt r15 r9 r1
+beqz r15 if2exit
+add r5 r5 10
+s d2 SettingInput 0
+s d2 SettingOutput 20
+s d4 On 0
+s d3 On 0
+j start
+if2exit:
+slt r15 r9 r0
+beqz r15 if3else
+add r5 r5 20
+j if3exit
+if3else:
+add r5 r5 30
+s d4 On 0
+s d3 On 0
+if3exit:
+slt r15 r8 r2
+beqz r15 if4exit
+add r5 r5 1
+s d2 SettingInput 10
+s d3 On 1
+s d4 On 0
+if4exit:
+sgt r15 r8 r3
+beqz r15 if5exit
+add r5 r5 2
+s d2 SettingInput 10
+s d3 On 0
+s d4 On 1
+if5exit:
+s db Setting r5
+j start

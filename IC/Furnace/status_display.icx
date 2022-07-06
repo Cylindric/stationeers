@@ -1,0 +1,27 @@
+use loop
+use aliases
+
+alias ControlIC d0
+alias StatusDisplay d1
+alias Furnace d3
+alias PressureDisplay d4
+alias TempDisplay d5
+
+var status = ControlIC.Setting
+StatusDisplay.Setting = status
+
+if status > 0 && status < 900
+    StatusDisplay.Color = 2 # Green
+end
+if status > 900
+    StatusDisplay.Color = 4 # Red
+end
+if status < 1
+    StatusDisplay.Color = 1 # Grey
+end
+
+var temp = Furnace.Temperature
+TempDisplay.Setting = temp
+
+var pressure = Furnace.Pressure
+PressureDisplay.Setting = pressure

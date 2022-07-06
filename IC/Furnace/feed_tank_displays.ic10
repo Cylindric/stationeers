@@ -1,0 +1,16 @@
+alias ColdTemp r0
+alias HotTemp r1
+alias ColdTank d0
+alias ColdDisplay d1
+alias HotTank d3
+alias HotDisplay d4
+l ColdTemp ColdTank Temperature
+s ColdDisplay Mode 0
+s ColdDisplay Color 0
+s ColdDisplay Setting ColdTemp
+l HotTemp HotTank Temperature
+s HotDisplay Mode 0
+s HotDisplay Color 4
+s HotDisplay Setting HotTemp
+yield
+j 0

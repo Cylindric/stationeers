@@ -1,0 +1,19 @@
+use loop
+use aliases
+
+alias ColdTank d0
+alias ColdDisplay d1
+alias HotTank d3
+alias HotDisplay d4
+
+var ColdTemp = ColdTank.Temperature
+ColdDisplay.Mode = 0
+ColdDisplay.Color = 0
+ColdDisplay.Setting = ColdTemp
+
+var HotTemp = HotTank.Temperature
+HotDisplay.Mode = 0
+HotDisplay.Color = 4
+HotDisplay.Setting = HotTemp
+
+yield

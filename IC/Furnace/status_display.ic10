@@ -1,0 +1,29 @@
+alias status r0
+alias temp r1
+alias pressure r2
+alias ControlIC d0
+alias StatusDisplay d1
+alias Furnace d3
+alias PressureDisplay d4
+alias TempDisplay d5
+l status ControlIC Setting
+s StatusDisplay Setting status
+sgtz r15 status
+slt r14 status 900
+and r13 r15 r14
+beqz r13 if0exit
+s StatusDisplay Color 2
+if0exit:
+sgt r15 status 900
+beqz r15 if1exit
+s StatusDisplay Color 4
+if1exit:
+slt r15 status 1
+beqz r15 if2exit
+s StatusDisplay Color 1
+if2exit:
+l temp Furnace Temperature
+s TempDisplay Setting temp
+l pressure Furnace Pressure
+s PressureDisplay Setting pressure
+j 0
