@@ -1,0 +1,18 @@
+alias input r0
+alias qty r1
+alias item r2
+move r0 524371
+process:
+seqz r15 input
+beqz r15 if0exit
+yield
+j 0
+if0exit:
+mod qty input 10
+div input input 10
+floor input input
+mod item input 10
+div input input 10
+floor input input
+j process
+j 0

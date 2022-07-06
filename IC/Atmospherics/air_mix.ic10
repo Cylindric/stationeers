@@ -1,0 +1,28 @@
+alias PremixPressure r0
+alias AirPressure r1
+alias PreMixPressureSensor d0
+alias PreMixerValve d1
+alias AirMixPressureSensor d3
+alias AirMixerValve d4
+define MaxPressure 9000.0
+define MinPressure 8500.0
+l PremixPressure PreMixPressureSensor Pressure
+l AirPressure AirMixPressureSensor Pressure
+sgt r15 PremixPressure MaxPressure
+beqz r15 if0exit
+s PreMixerValve On 0
+if0exit:
+slt r15 PremixPressure MinPressure
+beqz r15 if1exit
+s PreMixerValve On 1
+if1exit:
+sgt r15 AirPressure MaxPressure
+beqz r15 if2exit
+s AirMixerValve On 0
+if2exit:
+slt r15 AirPressure MinPressure
+beqz r15 if3exit
+s AirMixerValve On 1
+if3exit:
+yield
+j 0

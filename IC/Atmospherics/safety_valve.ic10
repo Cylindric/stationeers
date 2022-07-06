@@ -1,0 +1,46 @@
+alias CurrentPressure r0
+alias PressureSensor d0
+alias DumpValve d1
+alias FeedValve d2
+alias OverPressureIndicator d3
+alias UnderPressureIndicator d4
+l CurrentPressure PressureSensor Pressure
+sgt r15 CurrentPressure 9000.0
+beqz r15 if0exit
+bdseal DumpValve EnableDumpValve
+bdseal FeedValve DisableFeedValve
+bdseal OverPressureIndicator EnableOverPressureIndicator
+bdseal UnderPressureIndicator DisableOverPressureIndicator
+if0exit:
+slt r15 CurrentPressure 8500.0
+beqz r15 if1exit
+bdseal DumpValve DisableDumpValve
+bdseal FeedValve EnableFeedValve
+bdseal OverPressureIndicator DisableOverPressureIndicator
+bdseal UnderPressureIndicator EnableOverPressureIndicator
+if1exit:
+j 0
+EnableDumpValve:
+s DumpValve On 1
+j ra
+DisableDumpValve:
+s DumpValve On 0
+j ra
+EnableFeedValve:
+s FeedValve On 1
+j ra
+DisableFeedValve:
+s FeedValve On 0
+j ra
+EnableOverPressureIndicator:
+s OverPressureIndicator On 1
+j ra
+DisableOverPressureIndicator:
+s OverPressureIndicator On 0
+j ra
+EnableUnderPressureIndicator:
+s UnderPressureIndicator On 1
+j ra
+DisableUnderPressureIndicator:
+s UnderPressureIndicator On 0
+j ra

@@ -1,0 +1,27 @@
+var input = 524371
+var qty
+var item
+
+use loop
+use aliases
+
+process:
+
+if input == 0
+    yield
+    j 0
+end
+
+qty = input % 10
+input = input / 10
+floor input input
+
+item = input % 10
+input = input / 10
+floor input input
+
+# do something with item
+#
+#
+
+j process

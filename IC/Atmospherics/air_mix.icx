@@ -1,0 +1,62 @@
+# AIR MIXER
+#
+# This code can be used to control the mixing of the three input
+# gasses into a safe breathable atmosphere.
+#
+# Attach the following devices to the IC Socket:
+#   D0 - Pre-Mix Pressure sensor (either a Pipe Analyser or a Tank)
+#   D1 - Pre-Mixer valve
+#   D2 - n/c
+#   D3 - Air Pressure sensor (either a Pipe Analyser or a Tank)
+#   D4 - Air-Mixer valve
+#
+#   OXYGEN --------\ 30%
+#                   X-----\
+#   NITROGEN ------/ 70%   \ 90%
+#                           X--------- AIR
+#   CARBON DIOXIDE --------/ 10%
+
+use loop
+use aliases
+
+alias PreMixPressureSensor d0
+alias PreMixerValve d1
+alias AirMixPressureSensor d3
+alias AirMixerValve d4
+
+const MaxPressure = 9000.0
+const MinPressure = 8500.0
+
+# Read current pressure value
+var PremixPressure = PreMixPressureSensor.Pressure
+var AirPressure = AirMixPressureSensor.Pressure
+
+#################
+### PRE-MIX STAGE
+#################
+
+# If pressure is high, stop mixing
+if PremixPressure > MaxPressure
+    PreMixerValve.On = 0
+end
+
+# If pressure is low, enable mixing
+if PremixPressure < MinPressure
+    PreMixerValve.On = 1
+end
+
+##################
+# SECOND-MIX STAGE
+##################
+
+# If pressure is high, stop mixing
+if AirPressure > MaxPressure
+    AirMixerValve.On = 0
+end
+
+# If pressure is low, enable mixing
+if AirPressure < MinPressure
+    AirMixerValve.On = 1
+end
+
+yield
