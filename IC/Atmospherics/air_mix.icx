@@ -2,6 +2,10 @@
 #
 # This code can be used to control the mixing of the three input
 # gasses into a safe breathable atmosphere.
+# Mixing is disabled once MinPressure is reached.
+#
+# A standard SafetyValve should be attached to both the PreMix and Air
+# systems to protect against over-pressure.
 #
 # Attach the following devices to the IC Socket:
 #   D0 - Pre-Mix Pressure sensor (either a Pipe Analyser or a Tank)
@@ -24,7 +28,6 @@ alias PreMixerValve d1
 alias AirMixPressureSensor d3
 alias AirMixerValve d4
 
-const MaxPressure = 9000.0
 const MinPressure = 8500.0
 
 # Read current pressure value
@@ -35,12 +38,12 @@ var AirPressure = AirMixPressureSensor.Pressure
 ### PRE-MIX STAGE
 #################
 
-# If pressure is high, stop mixing
-if PremixPressure > MaxPressure
+# If there is enough PreMix, stop mixing
+if PremixPressure > MinPressure
     PreMixerValve.On = 0
 end
 
-# If pressure is low, enable mixing
+# If there is not enough PreMix, enable mixing
 if PremixPressure < MinPressure
     PreMixerValve.On = 1
 end
@@ -49,12 +52,12 @@ end
 # SECOND-MIX STAGE
 ##################
 
-# If pressure is high, stop mixing
-if AirPressure > MaxPressure
+# If there is enough Air, stop mixing
+if AirPressure > MinPressure
     AirMixerValve.On = 0
 end
 
-# If pressure is low, enable mixing
+# If there is not enough Air, enable mixing
 if AirPressure < MinPressure
     AirMixerValve.On = 1
 end
