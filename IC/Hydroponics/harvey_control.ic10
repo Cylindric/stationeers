@@ -1,0 +1,61 @@
+alias Mature1 r0
+alias Mature2 r1
+alias Mature3 r2
+alias SeedsReady1 r3
+alias SeedsReady2 r4
+alias SeedsReady3 r5
+alias Harvey1 d0
+alias Harvey2 d1
+alias Harvey3 d2
+alias Bay1 d3
+alias Bay2 d4
+alias Bay3 d5
+ls Mature1 Bay1 0 Mature
+ls Mature2 Bay2 0 Mature
+ls Mature3 Bay3 0 Mature
+ls SeedsReady1 Harvey1 0 Quantity
+ls SeedsReady2 Harvey2 0 Quantity
+ls SeedsReady3 Harvey3 0 Quantity
+seq r15 Mature1 -1
+sgtz r14 SeedsReady1
+and r13 r15 r14
+beqz r13 if0exit
+s Harvey1 Plant 1
+if0exit:
+seq r15 Mature2 -1
+sgtz r14 SeedsReady2
+and r13 r15 r14
+beqz r13 if1exit
+s Harvey2 Plant 1
+if1exit:
+seq r15 Mature3 -1
+sgtz r14 SeedsReady3
+and r13 r15 r14
+beqz r13 if2exit
+s Harvey3 Plant 1
+if2exit:
+sleep 4
+seq r15 Mature1 -1
+seq r14 Mature3 -1
+seq r13 Mature3 -1
+and r12 r15 r14
+and r12 r12 r13
+beqz r12 if3else
+sb -1758710260 On 0
+j if3exit
+if3else:
+sb -1758710260 On 1
+if3exit:
+seq r15 Mature1 1
+beqz r15 if4exit
+s Harvey1 Harvest 1
+if4exit:
+seq r15 Mature2 1
+beqz r15 if5exit
+s Harvey2 Harvest 1
+if5exit:
+seq r15 Mature3 1
+beqz r15 if6exit
+s Harvey3 Harvest 1
+if6exit:
+j 0

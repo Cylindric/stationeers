@@ -1,0 +1,72 @@
+# HARVEY CONTROL
+# ==============
+#
+# This code can be used to semi-automate Harveys.
+# Three Harveys and three Hydroponic Bays can be controlled with one IC.
+# Any GrowLights found on the network will be turned on if any Bay contains plants.
+#
+# Attach the following devices to the IC Socket. Devices marked with a * are optional:
+#   D0 - Harvey One
+#   D1 - Harvey Two
+#   D2 - Harvey Three
+#   D3 - Hydroponic Bay One
+#   D4 - Hydroponic Bay Two
+#   D5 - Hydroponic Bay Three
+
+use aliases
+use loop
+
+const GROWLIGHT = -1758710260
+const BAY_PLANTSLOT = 0
+const BAY_EMPTY = -1
+const BAY_MATURE = 1
+const HARVEY_INPUTSLOT = 0
+
+
+alias Harvey1 d0
+alias Harvey2 d1
+alias Harvey3 d2
+
+alias Bay1 d3
+alias Bay2 d4
+alias Bay3 d5
+
+var Mature1 = Bay1.slot(BAY_PLANTSLOT).Mature
+var Mature2 = Bay2.slot(BAY_PLANTSLOT).Mature
+var Mature3 = Bay3.slot(BAY_PLANTSLOT).Mature
+
+var SeedsReady1 = Harvey1.slot(HARVEY_INPUTSLOT).Quantity
+var SeedsReady2 = Harvey2.slot(HARVEY_INPUTSLOT).Quantity
+var SeedsReady3 = Harvey3.slot(HARVEY_INPUTSLOT).Quantity
+
+# Plant seeds into any empty bays
+if Mature1 == BAY_EMPTY && SeedsReady1 > 0
+    Harvey1.Plant = 1
+end
+if Mature2 == BAY_EMPTY && SeedsReady2 > 0
+    Harvey2.Plant = 1
+end
+if Mature3 == BAY_EMPTY && SeedsReady3 > 0
+    Harvey3.Plant = 1
+end
+
+sleep 4
+
+# Turn on grow-lights if any bays need it
+if Mature1 == BAY_EMPTY && Mature3 == BAY_EMPTY && Mature3 == BAY_EMPTY
+    d(GROWLIGHT).On = 0
+else
+    d(GROWLIGHT).On = 1
+end
+
+# Harvest plants from mature bays
+if Mature1 == BAY_MATURE
+    Harvey1.Harvest = 1
+end
+if Mature2 == BAY_MATURE
+    Harvey2.Harvest = 1
+end
+if Mature3 == BAY_MATURE
+    Harvey3.Harvest = 1
+end
+
