@@ -1,0 +1,32 @@
+alias count r0
+alias SiloA d0
+alias SiloB d1
+alias SiloC d2
+alias DisplayA d3
+alias DisplayB d4
+alias DisplayC d5
+bdseal SiloA ReadSiloA
+bdseal DisplayA UpdateDisplayA
+bdseal SiloB ReadSiloB
+bdseal DisplayB UpdateDisplayB
+bdseal SiloC ReadSiloC
+bdseal DisplayC UpdateDisplayC
+j 0
+ReadSiloA:
+l count SiloA Quantity
+j ra
+ReadSiloB:
+l count SiloB Quantity
+j ra
+ReadSiloC:
+l count SiloC Quantity
+j ra
+UpdateDisplayA:
+s DisplayA Setting count
+j ra
+UpdateDisplayB:
+s DisplayB Setting count
+j ra
+UpdateDisplayC:
+s DisplayC Setting count
+j ra

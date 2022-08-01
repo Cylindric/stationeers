@@ -1,0 +1,60 @@
+alias siloHash r0
+alias requestedHash r1
+alias en r2
+alias available r3
+alias exported r4
+alias Controller d0
+alias Button d1
+alias Silo1 d2
+alias Silo2 d3
+alias Silo3 d4
+alias Silo4 d5
+s db Setting 0
+start:
+l requestedHash Controller Setting
+l en Button Setting
+seqz r15 en
+beqz r15 if0exit
+yield
+j start
+if0exit:
+s db Setting 1
+move siloHash 412924554
+alias silo d2
+bdseal d2 ProcessSilo
+move siloHash 0
+alias silo d3
+bdseal d3 ProcessSilo
+move siloHash 0
+alias silo d4
+bdseal d4 ProcessSilo
+move siloHash 0
+alias silo d5
+bdseal d5 ProcessSilo
+j start
+ProcessSilo:
+seq r15 requestedHash siloHash
+beqz r15 if1exit
+s silo ClearMemory 1
+loop_silo:
+l available silo Quantity
+l exported silo ExportCount
+seqz r14 available
+beqz r14 if2exit
+s db Setting 999
+j ra
+if2exit:
+slt r14 exported 1
+beqz r14 if3else
+s db Setting 3
+s silo Open 1
+yield
+s silo Open 0
+j loop_silo
+j if3exit
+if3else:
+s db Setting 2
+s silo Open 0
+if3exit:
+if1exit:
+j ra

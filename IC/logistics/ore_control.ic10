@@ -1,0 +1,25 @@
+alias hash r0
+alias SelectedItem r1
+alias Dial d0
+start:
+l SelectedItem Dial Setting
+brne SelectedItem 0 2
+move hash 1758427767
+brne SelectedItem 1 2
+move hash -1516581844
+brne SelectedItem 2 2
+move hash -916518678
+brne SelectedItem 3 2
+move hash 1103972403
+brne SelectedItem 4 2
+move hash 1830218956
+brne SelectedItem 5 2
+move hash -190236170
+brne SelectedItem 6 2
+move hash -1348105509
+brne SelectedItem 7 2
+move hash -983091249
+brne SelectedItem 8 2
+move hash 1724793494
+s db Setting hash
+j start

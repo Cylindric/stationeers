@@ -1,0 +1,46 @@
+# SILO COUNT DISPLAY
+#
+# Displays the current stack count in up to three Silos on three attached LED displays
+#
+
+use aliases
+use loop
+
+alias SiloA d0
+alias SiloB d1
+alias SiloC d2
+alias DisplayA d3
+alias DisplayB d4
+alias DisplayC d5
+
+
+var count
+
+bdseal SiloA ReadSiloA
+bdseal DisplayA UpdateDisplayA
+
+bdseal SiloB ReadSiloB
+bdseal DisplayB UpdateDisplayB
+
+bdseal SiloC ReadSiloC
+bdseal DisplayC UpdateDisplayC
+
+function ReadSiloA
+    count = SiloA.Quantity
+end
+function ReadSiloB
+    count = SiloB.Quantity
+end
+function ReadSiloC
+    count = SiloC.Quantity
+end
+
+function UpdateDisplayA
+    DisplayA.Setting = count
+end
+function UpdateDisplayB
+    DisplayB.Setting = count
+end
+function UpdateDisplayC
+    DisplayC.Setting = count
+end

@@ -1,0 +1,48 @@
+use aliases
+
+alias Dial d0
+
+var hash
+
+start:
+var SelectedItem = Dial.Setting
+switch SelectedItem
+    case 0
+        hash = -404336834 # Copper Ingot
+    end
+    case 1
+        hash = 226410516 # Gold Ingot
+    end
+    case 2
+        hash = -1301215609 # Iron Ingot
+    end
+    case 3
+        hash = -654790771 # Steel Ingot
+    end
+    case 4
+        hash = -1406385572 # Nickel Ingot
+    end
+    case 5
+        hash = -290196476 # Silicon Ingot
+    end
+    case 6
+        hash = -929742000 # Silver Ingot
+    end
+    case 7
+        hash =  1058547521 # Constantan Ingot
+    end
+    case 8
+        hash =  502280180 # Electrum Ingot
+    end
+    case 9
+        hash = -297990285 # Invar Ingot
+    end
+    case 10
+        hash =  -82508479 # Solder Ingot
+    end
+    case 11
+        hash = 2134647745 # Lead Ingot
+    end
+end
+db.Setting = hash
+j start

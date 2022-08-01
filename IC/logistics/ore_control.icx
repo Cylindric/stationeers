@@ -1,0 +1,40 @@
+use aliases
+
+alias Dial d0
+
+var hash
+
+start:
+var SelectedItem = Dial.Setting
+switch SelectedItem
+    case 0
+        hash = 1758427767 # Iron Ore
+    end
+    case 1
+        hash = -1516581844 # Uranium Ore
+    end
+    case 2
+        hash = -916518678 # Silver Ore
+    end
+    case 3
+        hash = 1103972403 # Silicon Ore
+    end
+    case 4
+        hash = 1830218956 # Nickel Ore
+    end
+    case 5
+        hash = -190236170 # Lead Ore
+    end
+    case 6
+        hash = -1348105509 # Gold Ore
+    end
+    case 7
+        hash = -983091249 # Cobalt Ore
+    end
+    case 8
+        hash = 1724793494 # Coal Ore
+    end
+
+end
+db.Setting = hash
+j start

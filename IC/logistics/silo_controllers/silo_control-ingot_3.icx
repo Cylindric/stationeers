@@ -1,0 +1,76 @@
+use aliases
+
+alias Controller d0
+alias Button d1
+alias Silo1 d2
+alias Silo2 d3
+alias Silo3 d4
+alias Silo4 d5
+const DESIRED_QTY = 1
+
+const STATE_OK = 0
+const STATE_SEARCHING = 1
+const STATE_DONE = 2
+const STATE_WORKING = 3
+const STATE_SHORTAGE = 999
+
+const ITEM1 =   502280180 # Electrum
+const ITEM2 =  -297990285 # Invar
+const ITEM3 =   -82508479 # Solder
+const ITEM4 =  -654790771 # Steel
+
+var siloHash
+db.Setting = STATE_OK
+
+start:
+
+var requestedHash = Controller.Setting
+var en = Button.Setting
+
+if en == 0
+    yield
+    j start
+end
+
+db.Setting = STATE_SEARCHING
+
+siloHash = ITEM1
+alias silo d2
+bdseal d2 ProcessSilo
+
+siloHash = ITEM2
+alias silo d3
+bdseal d3 ProcessSilo
+
+siloHash = ITEM3
+alias silo d4
+bdseal d4 ProcessSilo
+
+siloHash = ITEM4
+alias silo d5
+bdseal d5 ProcessSilo
+
+j start
+
+ProcessSilo:
+    if requestedHash == siloHash
+        silo.ClearMemory = 1
+        loop_silo:
+            var available = silo.Quantity
+            var exported = silo.ExportCount
+            if available == 0
+                db.Setting = STATE_SHORTAGE
+                j ra
+            end
+            if exported < DESIRED_QTY
+                db.Setting = STATE_WORKING
+                silo.Open = 1
+                yield
+                silo.Open = 0
+                j loop_silo
+            else
+                db.Setting = STATE_DONE
+                silo.Open = 0
+            end
+    end
+j ra
