@@ -1,0 +1,76 @@
+use aliases
+use loop
+
+alias LED d0
+alias Controller1 d1
+alias Controller2 d2
+alias Controller3 d3
+alias Controller4 d4
+alias Controller5 d5
+
+const COLOR_GREEN = 2
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+
+# Get current controller counts
+var count1 = -1
+var count2 = -1
+var count3 = -1
+var count4 = -1
+var count5 = -1
+bdseal Controller1 ReadController1
+bdseal Controller2 ReadController2
+bdseal Controller3 ReadController3
+bdseal Controller4 ReadController4
+bdseal Controller5 ReadController5
+
+# Determine the current count
+var count = -1
+if count1 >= 0
+    count = count1
+end
+if count2 >= 0
+    count = count2
+end
+if count3 >= 0
+    count = count3
+end
+if count4 >= 0
+    count = count4
+end
+if count5 >= 0
+    count = count5
+end
+
+# Output the count
+LED.On = 1
+if count < 1
+    LED.Color = COLOR_RED
+end
+if count < 3
+    LED.Color = COLOR_YELLOW
+end
+if count >= 3
+    LED.Color = COLOR_WHITE
+end
+LED.Setting = count
+db.Setting = count
+
+###############################################################################
+
+function ReadController1
+    count1 = Controller1.Setting
+end
+function ReadController2
+    count2 = Controller2.Setting
+end
+function ReadController3
+    count3 = Controller3.Setting
+end
+function ReadController4
+    count4 = Controller4.Setting
+end
+function ReadController5
+    count5 = Controller5.Setting
+end

@@ -1,0 +1,74 @@
+alias count1 r0
+alias count2 r1
+alias count3 r2
+alias count4 r3
+alias count5 r4
+alias count r5
+alias LED d0
+alias Controller1 d1
+alias Controller2 d2
+alias Controller3 d3
+alias Controller4 d4
+alias Controller5 d5
+move count1 -1
+move count2 -1
+move count3 -1
+move count4 -1
+move count5 -1
+bdseal Controller1 ReadController1
+bdseal Controller2 ReadController2
+bdseal Controller3 ReadController3
+bdseal Controller4 ReadController4
+bdseal Controller5 ReadController5
+move count -1
+sgez r15 count1
+beqz r15 if0exit
+move count count1
+if0exit:
+sgez r15 count2
+beqz r15 if1exit
+move count count2
+if1exit:
+sgez r15 count3
+beqz r15 if2exit
+move count count3
+if2exit:
+sgez r15 count4
+beqz r15 if3exit
+move count count4
+if3exit:
+sgez r15 count5
+beqz r15 if4exit
+move count count5
+if4exit:
+s LED On 1
+slt r15 count 1
+beqz r15 if5exit
+s LED Color 4
+if5exit:
+slt r15 count 3
+beqz r15 if6exit
+s LED Color 5
+if6exit:
+sge r15 count 3
+beqz r15 if7exit
+s LED Color 6
+if7exit:
+s LED Setting count
+s db Setting count
+j 0
+ReadController1:
+l count1 Controller1 Setting
+j ra
+ReadController2:
+l count2 Controller2 Setting
+j ra
+ReadController3:
+l count3 Controller3 Setting
+j ra
+ReadController4:
+l count4 Controller4 Setting
+j ra
+ReadController5:
+l count5 Controller5 Setting
+j ra

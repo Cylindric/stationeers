@@ -1,0 +1,10 @@
+move sp 128
+jal resetchip
+move sp 0
+
+resetchip:
+beqz sp ra
+push 0
+sub sp sp 2
+j resetchip
+j ra

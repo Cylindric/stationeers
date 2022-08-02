@@ -1,10 +1,15 @@
+# INGOT REQUESTER CONTROLLER
+#
+# This module simply reads the number selected
+# on a dial (or memory, or anything with a Setting property)
+# and sets it's own setting to the Hash for that Item ID
+
 use aliases
+use loop
 
 alias Dial d0
 
 var hash
-
-start:
 var SelectedItem = Dial.Setting
 switch SelectedItem
     case 0
@@ -45,4 +50,3 @@ switch SelectedItem
     end
 end
 db.Setting = hash
-j start

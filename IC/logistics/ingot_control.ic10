@@ -1,7 +1,6 @@
 alias hash r0
 alias SelectedItem r1
 alias Dial d0
-start:
 l SelectedItem Dial Setting
 brne SelectedItem 0 2
 move hash -404336834
@@ -28,4 +27,4 @@ move hash -82508479
 brne SelectedItem 11 2
 move hash 2134647745
 s db Setting hash
-j start
+j 0

@@ -1,60 +1,72 @@
 alias siloHash r0
-alias requestedHash r1
-alias en r2
-alias available r3
-alias exported r4
+alias multi r1
+alias requestedHash r2
+alias dispense r3
+alias found r4
+alias qty r5
+alias available r6
+alias exported r7
 alias Controller d0
 alias Button d1
 alias Silo1 d2
 alias Silo2 d3
 alias Silo3 d4
 alias Silo4 d5
-s db Setting 0
 start:
 l requestedHash Controller Setting
-l en Button Setting
-seqz r15 en
-beqz r15 if0exit
-yield
-j start
-if0exit:
-s db Setting 1
+l dispense Button Setting
+move found 0
 move siloHash 502280180
+move multi 20
 alias silo d2
 bdseal d2 ProcessSilo
 move siloHash -297990285
+move multi 20
 alias silo d3
 bdseal d3 ProcessSilo
 move siloHash -82508479
+move multi 20
 alias silo d4
 bdseal d4 ProcessSilo
 move siloHash -654790771
+move multi 50
 alias silo d5
 bdseal d5 ProcessSilo
+seqz r15 found
+beqz r15 if0exit
+s db Setting -1
+if0exit:
 j start
 ProcessSilo:
 seq r15 requestedHash siloHash
 beqz r15 if1exit
+l qty silo Quantity
+mul qty qty multi
+move found 1
+s db Setting qty
+seqz r14 dispense
+beqz r14 if2exit
+j ra
+if2exit:
 s silo ClearMemory 1
 loop_silo:
 l available silo Quantity
 l exported silo ExportCount
+mul available available multi
+mul exported exported multi
 seqz r14 available
-beqz r14 if2exit
-s db Setting 999
+beqz r14 if3exit
 j ra
-if2exit:
+if3exit:
 slt r14 exported 1
-beqz r14 if3else
-s db Setting 3
+beqz r14 if4else
 s silo Open 1
 yield
 s silo Open 0
 j loop_silo
-j if3exit
-if3else:
-s db Setting 2
+j if4exit
+if4else:
 s silo Open 0
-if3exit:
+if4exit:
 if1exit:
 j ra
