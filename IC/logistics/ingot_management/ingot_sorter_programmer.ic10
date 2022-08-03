@@ -1,0 +1,70 @@
+# INGOT MANAGEMENT: SORTER CONTROLLER
+#
+# Taken from the "Sorter IC Control" script from the Steam Workshop by Murk 2001,
+# and adapted for these Ingot Management modules.
+#
+# Attach one of these modules to each sorter feeding the Vending Machines, and 
+# uncomment the "push" line for the item(s) you want stored in that Vending Machine.
+# For the count display to work, only one item is permitted per Vending Machine.
+#
+
+alias sorter d0
+move sp 128 # the code is max 128 lines
+jal resetchip # sometimes rewriting/removing doesn't
+move sp 0   # reset it properly
+## comment / uncomment what you want sorting:
+
+#push -404336834  # copper ingot
+#push -1406385572 # nickel ingot
+#push -929742000  # silver ingot
+#push -290196476  # silicon ingot
+#push -1301215609 # iron ingot
+#push 226410516   # gold ingot
+#push 2134647745  # lead ingot
+
+#push -654790771  # steel ingot
+#push 1058547521  # constantan ingot
+#push -297990285  # invar ingot
+#push 502280180   # electrum ingot
+#push -82508479   # solder ingot
+
+#push 412924554   # astroloy ingot
+#push 1579842814  # hastelloy ingot
+#push -787796599  # inconel ingot
+#push -1897868623 # stellite ingot
+
+s sorter Mode 2
+l r9 sorter Mode
+s db Setting -1
+
+loop:
+yield
+ls r0 sorter 0 Occupied
+beqz r0 loop
+move sp 1
+ls r0 sorter 0 OccupantHash
+
+checkloop:
+peek r1
+add sp sp 1
+beq r1 r0 foundit
+bnez r1 checkloop
+move sp 1
+# not found - output
+s sorter Output 0
+next:
+j loop
+
+foundit:
+# matched - output
+s sorter Output 1
+l r0 sorter Quantity
+s db Setting r0
+j loop
+
+resetchip:
+beqz sp ra
+push 0
+sub sp sp 2
+j resetchip
+j ra

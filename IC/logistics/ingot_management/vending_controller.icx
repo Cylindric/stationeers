@@ -1,0 +1,29 @@
+# INGOT MANAGEMENT: VENDING MACHINE CONTROL
+#
+# This module waits for a button to be pushed, and
+# reads the current item hash from the Controller.
+# It then simply tells every Vending Machine it can see
+# to dispense one stack of that item.
+#
+
+use aliases
+use loop
+
+alias Button d0
+alias HashController d1
+
+const VENDING_MACHINE = -443130773
+
+var en = Button.Setting
+
+if en == 1
+
+    var hash = HashController.Setting
+
+    d(VENDING_MACHINE).ClearMemory = 1
+    d(VENDING_MACHINE).RequestHash = hash
+    d(VENDING_MACHINE).Activate = 1
+    yield
+    d(VENDING_MACHINE).Activate = 0
+
+end

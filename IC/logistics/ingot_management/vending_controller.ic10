@@ -1,0 +1,15 @@
+alias en r0
+alias hash r1
+alias Button d0
+alias HashController d1
+l en Button Setting
+seq r15 en 1
+beqz r15 if0exit
+l hash HashController Setting
+sb -443130773 ClearMemory 1
+sb -443130773 RequestHash hash
+sb -443130773 Activate 1
+yield
+sb -443130773 Activate 0
+if0exit:
+j 0

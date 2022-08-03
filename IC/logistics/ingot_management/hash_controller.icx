@@ -1,4 +1,4 @@
-# INGOT REQUESTER CONTROLLER
+# INGOT MANAGEMENT: HASH CONTROLLER
 #
 # This module simply reads the number selected
 # on a dial (or memory, or anything with a Setting property)
