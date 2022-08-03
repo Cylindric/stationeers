@@ -2,17 +2,21 @@
 #
 # This code can be used to control the mixing of the three input
 # gasses into a safe breathable atmosphere.
-# Mixing is disabled once MinPressure is reached.
+# Mixing is disabled once MIN_PRESSURE is reached.
 #
 # A standard SafetyValve should be attached to both the PreMix and Air
 # systems to protect against over-pressure.
+# The system will try to preserve an amount of Oxygen and Nitrogen so it
+# doesn't all get converted to Air. This is only active if a pressure
+# sensor (Tank or Analyser) is attached to D2/D5.
 #
-# Attach the following devices to the IC Socket:
+# Attach the following devices to the IC Socket (*optional):
 #   D0 - Pre-Mix Pressure sensor (either a Pipe Analyser or a Tank)
 #   D1 - Pre-Mixer valve
-#   D2 - n/c
+#   D2*- Oxygen sensor
 #   D3 - Air Pressure sensor (either a Pipe Analyser or a Tank)
 #   D4 - Air-Mixer valve
+#   D5*- Nitrogen sensor
 #
 #   OXYGEN --------\ 30%
 #                   X-----\
@@ -20,46 +24,77 @@
 #                           X--------- AIR
 #   CARBON DIOXIDE --------/ 10%
 
-use loop
 use aliases
+use loop
 
 alias PreMixPressureSensor d0
 alias PreMixerValve d1
+alias OxygenSensor d2
 alias AirMixPressureSensor d3
 alias AirMixerValve d4
+alias NitrogenSensor d5
 
-const MinPressure = 8500.0
+const MIN_PRESSURE = 8500.0
+const MIN_O2_PRESSURE = 500
+const MIN_N2_PRESSURE = 500
 
 # Read current pressure value
 var PremixPressure = PreMixPressureSensor.Pressure
 var AirPressure = AirMixPressureSensor.Pressure
+var O2Pressure = 99999 # If no sensor attached, assume plenty of input pressure
+var N2Pressure = 99999 # If no sensor attached, assume plenty of input pressure
+bdseal OxygenSensor ReadOxygenPressure
+bdseal NitrogenSensor ReadNitrogenPressure
 
 #################
 ### PRE-MIX STAGE
 #################
 
+# Make sure there's enough supply gas on the input side
+if O2Pressure > MIN_O2_PRESSURE && N2Pressure > MIN_N2_PRESSURE
+    input_ok = 1
+else
+    input_ok = 0
+end
+
+# If there is not enough supply gas, stop mixing
+if input_ok == 0
+    PreMixerValve.On = 0
+end
+
 # If there is enough PreMix, stop mixing
-if PremixPressure > MinPressure
+if PremixPressure > MIN_PRESSURE
     PreMixerValve.On = 0
 end
 
 # If there is not enough PreMix, enable mixing
-if PremixPressure < MinPressure
+if input_ok == 1 && PremixPressure < MIN_PRESSURE
     PreMixerValve.On = 1
 end
 
 ##################
 # SECOND-MIX STAGE
 ##################
+# The second stage doesn't care about input gas levels, because if there's not
+# enough feed-O2 or feed-N2, all that happens is the pre-mix pipe of O2+N2 is emptied.
 
 # If there is enough Air, stop mixing
-if AirPressure > MinPressure
+if AirPressure > MIN_PRESSURE
     AirMixerValve.On = 0
 end
 
 # If there is not enough Air, enable mixing
-if AirPressure < MinPressure
+if AirPressure < MIN_PRESSURE
     AirMixerValve.On = 1
 end
 
 yield
+
+###############################################################################
+function ReadOxygenPressure
+    var O2Pressure = OxygenSensor.Pressure
+end
+
+function ReadNitrogenPressure
+    var N2Pressure = NitrogenSensor.Pressure
+end
