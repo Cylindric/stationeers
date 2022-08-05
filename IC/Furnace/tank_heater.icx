@@ -1,0 +1,28 @@
+use aliases
+use loop
+
+alias HotTank d0
+alias HeaterSwitch d1
+
+var enabled_setting = 1
+
+bdseal HeaterSwitch SetEnableValue
+
+
+const TARGET_TEMP = 2000
+var Temp = HotTank.Temperature
+
+if Temp < TARGET_TEMP
+    db.Setting = enabled_setting
+else
+    db.Setting = 0
+end
+
+yield
+
+#################################################################
+
+function SetEnableValue
+    var s = HeaterSwitch.Setting
+    enabled_setting = s
+end

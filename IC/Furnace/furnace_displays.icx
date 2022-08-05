@@ -15,11 +15,6 @@ var Tmin = 0
 var Tmax = 0
 var Hash = 0
 
-PminDisplay.Mode = 0
-PmaxDisplay.Mode = 0
-TminDisplay.Mode = 0
-TmaxDisplay.Mode = 0
-
 start:
 
 # Read the value off the item-selector, and jump down to that item
@@ -108,8 +103,27 @@ switch SelectedItem
 end
 
 db.Setting = Hash
-PminDisplay.Setting = Pmin
-PmaxDisplay.Setting = Pmax
-TminDisplay.Setting = Tmin
-TmaxDisplay.Setting = Tmax
+bdseal PminDisplay setPmin
+bdseal PmaxDisplay setPmax
+bdseal TminDisplay setTmin
+bdseal TmaxDisplay setTmax
 j start
+
+#################################################################
+
+function setPmin
+    PminDisplay.Mode = 0
+    PminDisplay.Setting = Pmin
+end
+function setPmax
+    PmaxDisplay.Mode = 0
+    PmaxDisplay.Setting = Pmax
+end
+function setTmin
+    TminDisplay.Mode = 0
+    TminDisplay.Setting = Tmin
+end
+function setTmax
+    TmaxDisplay.Mode = 0
+    TmaxDisplay.Setting = Tmax
+end

@@ -1,0 +1,84 @@
+use aliases
+
+alias Controller d0
+alias Button d1
+alias Silo1 d2
+alias Silo2 d3
+alias Silo3 d4
+alias Silo4 d5
+const DESIRED_QTY = 1
+db.Setting = 0
+var siloHash
+
+start:
+# push 1758427767  # Iron
+# push -1516581844 # Uranium
+# push -916518678  # Silver
+# push 1103972403  # Silicon
+# push 1830218956 # Nickel
+# push -190236170 # Lead
+# push -1348105509 # Gold
+# push -983091249 # Cobalt
+push 1724793494 # Coal
+push 0 # 
+push 0 # 
+push 0 # 
+
+var requestedHash = Controller.Setting
+var en = Button.Setting
+
+if en == 0
+    yield
+    j start
+end
+
+pop siloHash
+alias silo d5
+bdseal d5 ProcessSilo
+
+pop siloHash
+alias silo d4
+bdseal d5 ProcessSilo
+
+pop siloHash
+alias silo d3
+bdseal d5 ProcessSilo
+
+pop siloHash
+alias silo d2
+bdseal d5 ProcessSilo
+
+j start
+
+ProcessSilo:
+    if requestedHash == siloHash
+        silo.ClearMemory = 1
+        loop_silo:
+            var exported = silo.ExportCount
+            if exported < DESIRED_QTY
+                silo.Open = 1
+                db.Setting = exported
+                silo.Open = 0
+                j loop_silo
+            else
+                silo.Open = 0
+            end
+    end
+j ra
+
+# if requestedHash == THIS_HASH
+#     var count
+#     var en = Button.Setting
+#     if en == 1
+#         Silo.ClearMemory = 1
+#     end
+#     var exported = Silo.ExportCount
+#     if exported < desired_qty
+#         Silo.Open = 1
+#         db.Setting = exported
+#     else
+#         Silo.Open = 0
+#     end
+# end
+
+# j start

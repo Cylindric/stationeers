@@ -14,10 +14,6 @@ move Pmax 0
 move Tmin 0
 move Tmax 0
 move Hash 0
-s PminDisplay Mode 0
-s PmaxDisplay Mode 0
-s TminDisplay Mode 0
-s TmaxDisplay Mode 0
 start:
 move Pmax 100000
 move Tmax 100000
@@ -78,8 +74,25 @@ move Pmin 10000
 move Pmax 20000
 move Tmin 1800
 s db Setting Hash
-s PminDisplay Setting Pmin
-s PmaxDisplay Setting Pmax
-s TminDisplay Setting Tmin
-s TmaxDisplay Setting Tmax
+bdseal PminDisplay setPmin
+bdseal PmaxDisplay setPmax
+bdseal TminDisplay setTmin
+bdseal TmaxDisplay setTmax
 j start
+jr 17
+setPmin:
+s PminDisplay Mode 0
+s PminDisplay Setting Pmin
+j ra
+setPmax:
+s PmaxDisplay Mode 0
+s PmaxDisplay Setting Pmax
+j ra
+setTmin:
+s TminDisplay Mode 0
+s TminDisplay Setting Tmin
+j ra
+setTmax:
+s TmaxDisplay Mode 0
+s TmaxDisplay Setting Tmax
+j ra

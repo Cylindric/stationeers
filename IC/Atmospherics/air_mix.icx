@@ -10,12 +10,15 @@
 # doesn't all get converted to Air. This is only active if a pressure
 # sensor (Tank or Analyser) is attached to D2/D5.
 #
+# NOTE: this controller does not take the input gas temperature into account,
+#       so if they are very different, the ratios won't be precise.
+#
 # Attach the following devices to the IC Socket (*optional):
 #   D0 - Pre-Mix Pressure sensor (either a Pipe Analyser or a Tank)
-#   D1 - Pre-Mixer valve
+#   D1 - Pre-Mixer valve manually set to 30% O2, 70% N2
 #   D2*- Oxygen sensor
 #   D3 - Air Pressure sensor (either a Pipe Analyser or a Tank)
-#   D4 - Air-Mixer valve
+#   D4 - Air-Mixer valve manually set to 90% premix, 10% CO2
 #   D5*- Nitrogen sensor
 #
 #   OXYGEN --------\ 30%
@@ -36,13 +39,14 @@ alias NitrogenSensor d5
 
 const MIN_PRESSURE = 8500.0
 const MIN_O2_PRESSURE = 500
-const MIN_N2_PRESSURE = 500
+const MIN_N2_PRESSURE = 501
 
 # Read current pressure value
+var input_ok
 var PremixPressure = PreMixPressureSensor.Pressure
 var AirPressure = AirMixPressureSensor.Pressure
-var O2Pressure = 99999 # If no sensor attached, assume plenty of input pressure
-var N2Pressure = 99999 # If no sensor attached, assume plenty of input pressure
+var O2Pressure = 99999
+var N2Pressure = 99999
 bdseal OxygenSensor ReadOxygenPressure
 bdseal NitrogenSensor ReadNitrogenPressure
 
@@ -92,9 +96,9 @@ yield
 
 ###############################################################################
 function ReadOxygenPressure
-    var O2Pressure = OxygenSensor.Pressure
+    O2Pressure = OxygenSensor.Pressure
 end
 
 function ReadNitrogenPressure
-    var N2Pressure = NitrogenSensor.Pressure
+    N2Pressure = NitrogenSensor.Pressure
 end

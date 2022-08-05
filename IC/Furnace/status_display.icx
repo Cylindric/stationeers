@@ -8,20 +8,33 @@ alias PressureDisplay d4
 alias TempDisplay d5
 
 var status = ControlIC.Setting
-StatusDisplay.Setting = status
-
-if status > 0 && status < 900
-    StatusDisplay.Color = 2 # Green
-end
-if status > 900
-    StatusDisplay.Color = 4 # Red
-end
-if status < 1
-    StatusDisplay.Color = 1 # Grey
-end
-
 var temp = Furnace.Temperature
-TempDisplay.Setting = temp
-
 var pressure = Furnace.Pressure
-PressureDisplay.Setting = pressure
+
+bdseal StatusDisplay SetStatusDisplay
+bdseal TempDisplay SetTemperatureDisplay
+bdseal PressureDisplay SetPressureDisplay
+
+#################################################################
+
+function SetStatusDisplay
+    StatusDisplay.Setting = status
+
+    if status > 0 && status < 900
+        StatusDisplay.Color = 2 # Green
+    end
+    if status > 900
+        StatusDisplay.Color = 4 # Red
+    end
+    if status < 1
+        StatusDisplay.Color = 1 # Grey
+    end
+end
+
+function SetTemperatureDisplay
+    TempDisplay.Setting = temp
+end
+
+function SetPressureDisplay
+    PressureDisplay.Setting = pressure
+end

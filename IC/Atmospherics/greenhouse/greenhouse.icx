@@ -1,0 +1,65 @@
+# Turns on an Pollutant/Volatile filter if present 
+#
+# SETUP
+#
+# One Gas Sensor on d0
+# One Filter with a Pollutant cartridge and a Volatile cartridge on d1
+# One Volume Pump to import atmosphere on d2
+# One Volume Pump to remove excess atmosphere on d3
+#
+# One air conditioner set to ~21°C (15-50)
+
+# 40 kPa atmosphere of minimum 1% carbon dioxide.
+# 5oC < Water Temperature < 60oC
+
+use loop
+use aliases
+
+alias Sensor d0
+alias FilterBad d1
+alias TopupPump d2
+alias DumpPump d3
+
+var currentNitrogen = Sensor.RatioNitrogen
+var currentCarbonDioxide = Sensor.RatioCarbonDioxide
+var currentNitrous = Sensor.RatioNitrousOxide
+var currentOxygen = Sensor.RatioOxygen
+var currentPollutant = Sensor.RatioPollutant
+var currentVolatile = Sensor.RatioVolatiles
+var currentPressure = Sensor.Pressure
+
+# Remove unwanted Pollutant and Volatile gas
+var badFilterEnabled = 0
+if currentPollutant > 0 || currentVolatile > 0
+    badFilterEnabled = 1
+end
+bdseal FilterBad setBadFilter
+
+# Remove excess atmoshpere
+var dumpPumpEnabled = 0
+if currentPressure > 190
+    dumpPumpEnabled = 1
+end
+bdseal DumpPump setDumpPump
+
+# Topup missing atmosphere
+var topupPumpEnabled = 0
+if currentPressure < 8
+    topupPumpEnabled = 1
+end
+bdseal TopupPump setTopupPump
+
+
+###############################################################################
+
+function setBadFilter
+    FilterBad.On = badFilterEnabled
+end
+
+function setDumpPump
+    DumpPump.On = dumpPumpEnabled
+end
+
+function setTopupPump
+    TopupPump.On = topupPumpEnabled
+end

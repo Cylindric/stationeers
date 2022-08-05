@@ -1,16 +1,50 @@
-alias ColdTemp r0
-alias HotTemp r1
+alias t r0
+alias p r1
 alias ColdTank d0
-alias ColdDisplay d1
+alias ColdTemp d1
+alias ColdPressure d2
 alias HotTank d3
-alias HotDisplay d4
-l ColdTemp ColdTank Temperature
-s ColdDisplay Mode 0
-s ColdDisplay Color 0
-s ColdDisplay Setting ColdTemp
-l HotTemp HotTank Temperature
-s HotDisplay Mode 0
-s HotDisplay Color 4
-s HotDisplay Setting HotTemp
+alias HotTemp d4
+alias HotPressure d5
+l t ColdTank Temperature
+s ColdTemp Mode 0
+s ColdTemp Setting t
+sgt r15 t 500
+beqz r15 if0else
+s ColdTemp Color 4
+j if0exit
+if0else:
+s ColdTemp Color 2
+if0exit:
+l p ColdTank Pressure
+s ColdPressure Mode 0
+s ColdPressure Setting p
+slt r15 p 40000
+beqz r15 if1else
+s ColdPressure Color 4
+j if1exit
+if1else:
+s ColdPressure Color 2
+if1exit:
+l t HotTank Temperature
+s HotTemp Mode 0
+s HotTemp Setting t
+sgt r15 t 2000
+beqz r15 if2else
+s HotTemp Color 2
+j if2exit
+if2else:
+s HotTemp Color 4
+if2exit:
+l p HotTank Pressure
+s HotPressure Mode 0
+s HotPressure Setting p
+slt r15 p 40000
+beqz r15 if3else
+s HotPressure Color 4
+j if3exit
+if3else:
+s HotPressure Color 2
+if3exit:
 yield
 j 0

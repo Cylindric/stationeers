@@ -1,0 +1,33 @@
+use loop
+use aliases
+
+const GREEN = 2
+const RED = 4
+const ORANGE = 3
+const MODE_PERCENT = 1
+
+alias Filter d0
+alias ValueDisplay d1
+
+var filter1 = Filter.slot(0).Quantity
+var filter2 = Filter.slot(1).Quantity
+bdseal ValueDisplay ValuedDisplay
+
+yield
+
+function ValuedDisplay
+    var total = (filter1 + filter2) / 100
+    var average = (filter1 + filter2) / 200
+    ValueDisplay.Setting = average
+    ValueDisplay.Mode = MODE_PERCENT
+    ValueDisplay.Color = GREEN
+    if filter1 == 0 || filter2 == 0
+        ValueDisplay.Color = ORANGE
+    end
+    if filter1 == 0 && filter2 == 0
+        ValueDisplay.Color = RED
+    end
+    if total < 0.25
+        ValueDisplay.Color = RED
+    end
+end

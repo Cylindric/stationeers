@@ -1,0 +1,51 @@
+alias currentNitrogen r0
+alias currentCarbonDioxide r1
+alias currentNitrous r2
+alias currentOxygen r3
+alias currentPollutant r4
+alias currentVolatile r5
+alias currentPressure r6
+alias badFilterEnabled r7
+alias dumpPumpEnabled r8
+alias topupPumpEnabled r9
+alias Sensor d0
+alias FilterBad d1
+alias TopupPump d2
+alias DumpPump d3
+l currentNitrogen Sensor RatioNitrogen
+l currentCarbonDioxide Sensor RatioCarbonDioxide
+l currentNitrous Sensor RatioNitrousOxide
+l currentOxygen Sensor RatioOxygen
+l currentPollutant Sensor RatioPollutant
+l currentVolatile Sensor RatioVolatiles
+l currentPressure Sensor Pressure
+move badFilterEnabled 0
+sgtz r15 currentPollutant
+sgtz r14 currentVolatile
+or r13 r15 r14
+beqz r13 if0exit
+move badFilterEnabled 1
+if0exit:
+bdseal FilterBad setBadFilter
+move dumpPumpEnabled 0
+sgt r15 currentPressure 190
+beqz r15 if1exit
+move dumpPumpEnabled 1
+if1exit:
+bdseal DumpPump setDumpPump
+move topupPumpEnabled 0
+slt r15 currentPressure 8
+beqz r15 if2exit
+move topupPumpEnabled 1
+if2exit:
+bdseal TopupPump setTopupPump
+j 0
+setBadFilter:
+s FilterBad On badFilterEnabled
+j ra
+setDumpPump:
+s DumpPump On dumpPumpEnabled
+j ra
+setTopupPump:
+s TopupPump On topupPumpEnabled
+j ra

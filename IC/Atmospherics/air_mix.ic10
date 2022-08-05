@@ -1,7 +1,8 @@
-alias PremixPressure r0
-alias AirPressure r1
-alias O2Pressure r2
-alias N2Pressure r3
+alias input_ok r0
+alias PremixPressure r1
+alias AirPressure r2
+alias O2Pressure r3
+alias N2Pressure r4
 alias PreMixPressureSensor d0
 alias PreMixerValve d1
 alias OxygenSensor d2
@@ -10,44 +11,42 @@ alias AirMixerValve d4
 alias NitrogenSensor d5
 l PremixPressure PreMixPressureSensor Pressure
 l AirPressure AirMixPressureSensor Pressure
-beqz undefined if0exit
-beqz undefined if1exit
+move O2Pressure 99999
+move N2Pressure 99999
 bdseal OxygenSensor ReadOxygenPressure
 bdseal NitrogenSensor ReadNitrogenPressure
 sgt r15 O2Pressure 500
-sgt r14 N2Pressure 500
+sgt r14 N2Pressure 501
 and r13 r15 r14
-beqz r13 if2else
+beqz r13 if0else
 move input_ok 1
-j if2exit
-if2else:
+j if0exit
+if0else:
 move input_ok 0
-if2exit:
+if0exit:
 seqz r15 input_ok
-beqz r15 if3exit
+beqz r15 if1exit
 s PreMixerValve On 0
-if3exit:
+if1exit:
 sgt r15 PremixPressure 8500.0
-beqz r15 if4exit
+beqz r15 if2exit
 s PreMixerValve On 0
-if4exit:
+if2exit:
 seq r15 input_ok 1
 slt r14 PremixPressure 8500.0
 and r13 r15 r14
-beqz r13 if5exit
+beqz r13 if3exit
 s PreMixerValve On 1
-if5exit:
+if3exit:
 sgt r15 AirPressure 8500.0
-beqz r15 if6exit
+beqz r15 if4exit
 s AirMixerValve On 0
-if6exit:
+if4exit:
 slt r15 AirPressure 8500.0
-beqz r15 if7exit
+beqz r15 if5exit
 s AirMixerValve On 1
-if7exit:
+if5exit:
 yield
-if1exit:
-if0exit:
 j 0
 ReadOxygenPressure:
 l O2Pressure OxygenSensor Pressure

@@ -60,7 +60,7 @@ move r0 10000
 move r1 20000
 move r2 1800
 move r5 0
-seq r15 r6 1
+seq r15 r6 0
 beqz r15 if0exit
 s d3 On 0
 s d4 On 0

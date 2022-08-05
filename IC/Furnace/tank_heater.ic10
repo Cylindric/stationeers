@@ -1,0 +1,21 @@
+alias enabled_setting r0
+alias Temp r1
+alias s r2
+alias HotTank d0
+alias HeaterSwitch d1
+move enabled_setting 1
+bdseal HeaterSwitch SetEnableValue
+l Temp HotTank Temperature
+slt r15 Temp 2000
+beqz r15 if0else
+s db Setting enabled_setting
+j if0exit
+if0else:
+s db Setting 0
+if0exit:
+yield
+j 0
+SetEnableValue:
+l s HeaterSwitch Setting
+move enabled_setting s
+j ra

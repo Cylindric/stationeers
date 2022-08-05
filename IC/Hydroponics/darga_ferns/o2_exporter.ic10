@@ -1,0 +1,16 @@
+alias ratio r0
+alias Filter d0
+lb ratio -1252983604 RatioOxygen Maximum
+s db Setting 0
+slt r15 ratio 0.30
+beqz r15 if0exit
+s db Setting -1
+s Filter On 0
+if0exit:
+sgt r15 ratio 0.35
+beqz r15 if1exit
+s db Setting 1
+s Filter On 1
+if1exit:
+yield
+j 0

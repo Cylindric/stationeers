@@ -1,0 +1,34 @@
+# OXYGEN EXPORTER
+#
+# This controller attempts to keep the O2 levels in the room
+# below about 35%. Useful for exporting O2 created by Darga Ferns
+# whilst still keeping the room habitable.
+#
+# The room should be fed by the standard Breathable Air Mix.
+# The controller will search for any attached Gas Sensors.
+# A Filtration unit should be connected to d0 and loaded with O2 Filters.
+
+use aliases
+use loop
+
+alias Filter d0
+
+const GAS_SENSOR_HASH = -1252983604
+const O2_LOW = 0.30
+const O2_HIGH = 0.35
+
+var ratio = d(GAS_SENSOR_HASH).RatioOxygen(Maximum)
+
+db.Setting = 0
+
+if ratio < O2_LOW
+    db.Setting = -1
+    Filter.On = 0
+end
+
+if ratio > O2_HIGH
+    db.Setting = 1
+    Filter.On = 1
+end
+
+yield

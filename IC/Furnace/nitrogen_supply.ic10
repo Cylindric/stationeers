@@ -1,0 +1,43 @@
+alias Pcold r0
+alias Phot r1
+alias Tcold r2
+alias Thot r3
+alias ColdTank d0
+alias ColdTopup d1
+alias ColdControl d2
+alias HotTank d3
+alias HotTopup d4
+alias HotControl d5
+l Pcold ColdTank Pressure
+slt r15 Pcold 40000
+beqz r15 if0else
+s ColdTopup On 1
+j if0exit
+if0else:
+s ColdTopup On 0
+if0exit:
+l Phot HotTank Pressure
+slt r15 Phot 40000
+beqz r15 if1else
+s HotTopup On 1
+j if1exit
+if1else:
+s HotTopup On 0
+if1exit:
+l Tcold ColdTank Temperature
+slt r15 Tcold 500
+beqz r15 if2else
+s ColdControl On 1
+j if2exit
+if2else:
+s ColdControl On 0
+if2exit:
+l Thot HotTank Temperature
+sgt r15 Thot 2000
+beqz r15 if3else
+s HotControl On 1
+j if3exit
+if3else:
+s HotControl On 0
+if3exit:
+j 0

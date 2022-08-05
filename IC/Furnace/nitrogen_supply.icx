@@ -1,0 +1,43 @@
+use aliases
+use loop
+
+alias ColdTank d0
+alias ColdTopup d1
+alias ColdControl d2
+alias HotTank d3
+alias HotTopup d4
+alias HotControl d5
+
+const TARGET_PRESSURE = 40000
+const COLD_TEMPERATURE = 500
+const HOT_TEMPERATURE = 2000
+
+# Ensure enough pressure in reseve tanks
+var Pcold = ColdTank.Pressure
+if Pcold < TARGET_PRESSURE
+    ColdTopup.On = 1
+else
+    ColdTopup.On = 0
+end
+
+var Phot = HotTank.Pressure
+if Phot < TARGET_PRESSURE
+    HotTopup.On = 1
+else
+    HotTopup.On = 0
+end
+
+# Ensure correct temperatures in reserve tanks
+var Tcold = ColdTank.Temperature
+if Tcold < COLD_TEMPERATURE
+    ColdControl.On = 1
+else
+    ColdControl.On = 0
+end
+
+var Thot = HotTank.Temperature
+if Thot > HOT_TEMPERATURE
+    HotControl.On = 1
+else
+    HotControl.On = 0
+end

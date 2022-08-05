@@ -1,0 +1,36 @@
+alias filter1 r0
+alias filter2 r1
+alias total r2
+alias average r3
+alias Filter d0
+alias ValueDisplay d1
+ls filter1 Filter 0 Quantity
+ls filter2 Filter 1 Quantity
+bdseal ValueDisplay ValuedDisplay
+yield
+j 0
+ValuedDisplay:
+add r15 filter1 filter2
+div total r15 100
+add r15 filter1 filter2
+div average r15 200
+s ValueDisplay Setting average
+s ValueDisplay Mode 1
+s ValueDisplay Color 2
+seqz r15 filter1
+seqz r14 filter2
+or r13 r15 r14
+beqz r13 if0exit
+s ValueDisplay Color 3
+if0exit:
+seqz r15 filter1
+seqz r14 filter2
+and r13 r15 r14
+beqz r13 if1exit
+s ValueDisplay Color 4
+if1exit:
+sltz r15 total
+beqz r15 if2exit
+s ValueDisplay Color 4
+if2exit:
+j ra

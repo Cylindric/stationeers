@@ -1,0 +1,89 @@
+use aliases
+use loop
+
+alias LED d0
+alias Controller1 d1
+alias Controller2 d2
+alias Controller3 d3
+alias Controller4 d4
+alias Controller5 d5
+
+const COLOR_GREEN = 2
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+
+const STATE_OK = 0
+const STATE_SEARCHING = 1
+const STATE_DONE = 2
+const STATE_WORKING = 3
+const STATE_SHORTAGE = 999
+
+# Get current controller statuses
+var status1
+var status2
+var status3
+var status4
+var status5
+bdseal Controller1 ReadController1
+bdseal Controller2 ReadController2
+bdseal Controller3 ReadController3
+bdseal Controller4 ReadController4
+bdseal Controller5 ReadController5
+
+var status = STATE_OK
+
+# if any controllers are showing complete, set light to green
+if status1 == STATE_DONE || status2 == STATE_DONE  || status3 == STATE_DONE  || status4 == STATE_DONE  || status5 == STATE_DONE 
+    status = STATE_DONE
+end
+
+# If any controllers are showing working, set light to working
+if status1 == STATE_WORKING || status2 == STATE_WORKING  || status3 == STATE_WORKING  || status4 == STATE_WORKING  || status5 == STATE_WORKING 
+    status = STATE_WORKING
+end
+
+# If any controllers are showing shortage, set light to error
+if status1 == STATE_SHORTAGE || status2 == STATE_SHORTAGE  || status3 == STATE_SHORTAGE  || status4 == STATE_SHORTAGE  || status5 == STATE_SHORTAGE 
+    status = STATE_SHORTAGE
+end
+
+# Output the determined status
+switch status
+    case STATE_OK
+        LED.On = 0
+        LED.Color = COLOR_WHITE
+    end
+    case STATE_WORKING
+        LED.On = 1
+        LED.Color = COLOR_YELLOW
+    end
+    case STATE_SHORTAGE
+        LED.On = 1
+        LED.Color = COLOR_RED
+    end
+    case STATE_DONE
+        LED.On = 0
+        LED.Color = COLOR_GREEN
+    end
+end
+
+db.Setting = status
+
+###############################################################################
+
+function ReadController1
+    status1 = Controller1.Setting
+end
+function ReadController2
+    status2 = Controller2.Setting
+end
+function ReadController3
+    status3 = Controller3.Setting
+end
+function ReadController4
+    status4 = Controller4.Setting
+end
+function ReadController5
+    status5 = Controller5.Setting
+end
