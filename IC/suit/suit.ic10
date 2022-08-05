@@ -1,0 +1,55 @@
+l r0 db PressureExternal
+l r1 db TemperatureExternal
+l r2 db RatioOxygen
+l r3 db RatioPollutant
+l r4 db RatioVolatiles
+move r6 r5
+move r5 1
+slt r15 r0 50
+sgt r14 r0 200
+or r13 r15 r14
+beqz r13 if0exit
+move r5 0
+if0exit:
+slt r15 r1 283.15
+sgt r14 r1 313.15
+or r13 r15 r14
+beqz r13 if1exit
+move r5 0
+if1exit:
+slt r15 r2 0.7
+beqz r15 if2exit
+move r5 0
+if2exit:
+sgt r15 r3 0.02
+sgt r14 r4 0.02
+or r13 r15 r14
+beqz r13 if3exit
+move r5 0
+if3exit:
+seq r15 r5 0
+seq r14 r6 1
+and r13 r15 r14
+beqz r13 if4exit
+s d0 On 1
+if4exit:
+seq r15 r5 1
+seq r14 r6 0
+and r13 r15 r14
+beqz r13 if5exit
+s d0 On 0
+if5exit:
+seq r15 r5 1
+beqz r15 if6else
+s d0 Open 1
+s db AirRelease 0
+s db Filtration 0
+s db On 0
+j if6exit
+if6else:
+s d0 Open 0
+s db AirRelease 1
+s db Filtration 1
+s db On 1
+if6exit:
+j 0

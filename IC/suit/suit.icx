@@ -1,0 +1,71 @@
+use loop
+
+const SAFE = 1
+const UNSAFE = 0
+const MIN_PRESSURE = 50 # kPa
+const MAX_PRESSURE = 200 # kPa
+const MIN_TEMP = 283.15 # 10℃
+const MAX_TEMP = 313.15 # 40℃
+const MIN_OXYGEN = 0.7 # 70%
+const MAX_VOLATILES = 0.02 # 2%
+const MAX_POLLUTANT = 0.02 # 2%
+
+alias suit db
+alias helmet d0
+alias backpack d1
+
+var external_pressure = db.PressureExternal
+var external_temperature = db.TemperatureExternal
+var ext_o2 = db.RatioOxygen 
+var ext_pollutant = db.RatioPollutant
+var ext_volatiles = db.RatioVolatiles
+var status
+
+# Store the current state, to track direction of change
+var previous = status
+
+# Start on the assumption that the atmo is safe
+status = SAFE
+
+# Check external pressure
+if external_pressure < MIN_PRESSURE || external_pressure > MAX_PRESSURE
+    status = UNSAFE
+end
+
+# Check external temperature
+if external_temperature < MIN_TEMP || external_temperature > MAX_TEMP
+    status = UNSAFE
+end
+
+# Check enough Oxygen
+if ext_o2 < MIN_OXYGEN
+    status = UNSAFE
+end
+
+# Check clean enough air
+if ext_pollutant > MAX_POLLUTANT || ext_volatiles > MAX_VOLATILES
+    status = UNSAFE
+end
+
+# Moving from Safe to Unsafe
+if status == UNSAFE && previous == SAFE
+    helmet.On = 1
+end
+
+# Moving from Unsafe to Safe
+if status == SAFE && previous == UNSAFE
+    helmet.On = 0
+end
+
+# Open or close the helmet
+if status == SAFE
+    helmet.Open = 1 # Visor
+    suit.AirRelease = 0 # Air
+    suit.Filtration = 0 # Filters
+    suit.On = 0 # AC
+else
+    helmet.Open = 0 # Visor
+    suit.AirRelease = 1 # Air
+    suit.Filtration = 1 # Filters
+    suit.On = 1 # AC
+end
