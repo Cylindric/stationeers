@@ -1,3 +1,16 @@
+# SUIT CONTROL
+#
+# This module will attempt to determine if the outside atmosphere 
+# is safe or not, and then will either open or close the visor
+# as approrpriate. It will also turn off the suit light, heaters and pumps.
+#
+# NOTE: The module will only trigger on moving from safe to unsafe or
+#       unsafe to safe. This is so that if for example you are inside safe,
+#       but want to have the light on, you can turn it on and the module won't
+#       immediate turn it off again. In the same way, if for whatever reason the
+#       atmospere is not safe when the module thinks it is, closing the helmet
+#       should keep it closed.
+
 use loop
 
 const SAFE = 1
@@ -49,23 +62,18 @@ end
 
 # Moving from Safe to Unsafe
 if status == UNSAFE && previous == SAFE
-    helmet.On = 1
-end
-
-# Moving from Unsafe to Safe
-if status == SAFE && previous == UNSAFE
-    helmet.On = 0
-end
-
-# Open or close the helmet
-if status == SAFE
-    helmet.Open = 1 # Visor
-    suit.AirRelease = 0 # Air
-    suit.Filtration = 0 # Filters
-    suit.On = 0 # AC
-else
+    helmet.On = 1 # Light
     helmet.Open = 0 # Visor
     suit.AirRelease = 1 # Air
     suit.Filtration = 1 # Filters
     suit.On = 1 # AC
+end
+
+# Moving from Unsafe to Safe
+if status == SAFE && previous == UNSAFE
+    helmet.On = 0 # Light
+    helmet.Open = 1 # Visor
+    suit.AirRelease = 0 # Air
+    suit.Filtration = 0 # Filters
+    suit.On = 0 # AC
 end
