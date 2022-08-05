@@ -53,7 +53,7 @@ end
 sleep 4
 
 # Turn on grow-lights if any bays need it
-if Mature1 == BAY_EMPTY && Mature3 == BAY_EMPTY && Mature3 == BAY_EMPTY
+if Mature1 == BAY_EMPTY && Mature2 == BAY_EMPTY && Mature3 == BAY_EMPTY
     d(GROWLIGHT).On = 0
 else
     d(GROWLIGHT).On = 1
