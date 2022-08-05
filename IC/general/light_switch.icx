@@ -1,0 +1,25 @@
+# LIGHT SWITCH
+#
+# Super-simple module that reads an attached Switch and toggles
+# every light it can see on or off depending on the state of
+# the switch.
+#
+# Supports various types of light, but not all yet.
+
+use aliases
+use loop
+
+alias LightSwitch d0
+
+push 555215790  # Long Wide
+push 1514476632 # Round
+push 1847265835 # Long Angled
+push 1436121888 # Round Small
+
+var s = LightSwitch.Setting
+
+var hash
+foreach hash
+    d(hash).On = s
+end
+

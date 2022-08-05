@@ -1,0 +1,17 @@
+alias s r0
+alias hash r1
+alias LightSwitch d0
+push 555215790
+push 1514476632
+push 1847265835
+push 1436121888
+l s LightSwitch Setting
+move sp 1
+while0:
+peek hash
+sb hash On s
+breqz hash 3
+add sp sp 1
+j while0
+while0exit:
+j 0
