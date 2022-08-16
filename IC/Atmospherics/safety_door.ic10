@@ -1,0 +1,43 @@
+alias door_state r0
+alias door_mode r1
+alias light_state r2
+alias pressure r3
+alias override r4
+alias hash r5
+push -324331872
+push -793837322
+push 337416191
+lb pressure -1252983604 Pressure Minimum
+lb override 1220484876 Setting Maximum
+sgt r15 pressure 95
+beqz r15 if0else
+move door_state 1
+move light_state 0
+s db Setting 0
+j if0exit
+if0else:
+move door_state 0
+move light_state 1
+s db Setting 999
+if0exit:
+seq r15 override 1
+beqz r15 if1else
+move door_mode 0
+j if1exit
+if1else:
+move door_mode 1
+if1exit:
+move sp 1
+while0:
+peek hash
+sb hash Mode door_mode
+seq r15 door_mode 1
+beqz r15 if2exit
+sb hash Open door_state
+if2exit:
+breqz hash 3
+add sp sp 1
+j while0
+while0exit:
+sb -1535893860 On light_state
+j 0

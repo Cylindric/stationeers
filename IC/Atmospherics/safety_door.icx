@@ -1,0 +1,71 @@
+# Reads the pressure of all Gas Sensors it can find
+# and if the pressure is low, closes all doors it can find
+# and turns on any flashing lights it finds.
+# If it finds any switches, then the doors are set to manual
+# if the switch is on.
+#
+# Connect all of the following onto a dedicated logic network:
+#   An air-tight door
+#   A gas sensor on each side of the door
+#   A lever swich on each side of the door
+#   A flashing light on each side of the door
+#   An IC10 housing with this module running on it
+
+use aliases
+use loop
+
+const MIN_PRESSURE = 95
+
+const GAS_SENSOR = -1252983604
+const FLASHING_LIGHT = -1535893860
+const LEVER = 1220484876
+const DOOR_CLOSED = 0
+const DOOR_OPEN = 1
+const LIGHT_ON = 1
+const LIGHT_OFF = 0
+const DOOR_CONTROL_MANUAL = 0
+const DOOR_CONTROL_LOGIC = 1
+const LEVER_MANUAL_MODE = 1
+const LEVER_AUTO_MODE = 0
+
+
+push -324331872 # glass door
+push -793837322 # composite door
+push 337416191  # blast door
+
+var door_state
+var door_mode
+var light_state
+var pressure = d(GAS_SENSOR).Pressure(Minimum)
+var override = d(LEVER).Setting(Maximum) # Any switch on, puts the system into manual mode
+
+
+# Work out if things are safe or not
+if pressure > MIN_PRESSURE
+    door_state = DOOR_OPEN
+    light_state = LIGHT_OFF
+    db.Setting = 0
+else
+    door_state = DOOR_CLOSED
+    light_state = LIGHT_ON
+    db.Setting = 999
+end
+
+# If we're not in manual mode, control the doors
+if override == LEVER_MANUAL_MODE
+    door_mode = DOOR_CONTROL_MANUAL
+else
+    door_mode = DOOR_CONTROL_LOGIC
+end
+
+# Open/Close any doors
+var hash
+foreach hash
+    d(hash).Mode = door_mode
+    if door_mode == DOOR_CONTROL_LOGIC
+        d(hash).Open = door_state
+    end
+end
+
+# Turn on/off any emergency lights
+d(FLASHING_LIGHT).On = light_state
