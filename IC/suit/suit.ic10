@@ -5,19 +5,19 @@ l r3 db RatioPollutant
 l r4 db RatioVolatiles
 move r6 r5
 move r5 1
-slt r15 r0 50
+slt r15 r0 75
 sgt r14 r0 200
 or r13 r15 r14
 beqz r13 if0exit
 move r5 0
 if0exit:
 slt r15 r1 283.15
-sgt r14 r1 313.15
+sgt r14 r1 323.15
 or r13 r15 r14
 beqz r13 if1exit
 move r5 0
 if1exit:
-slt r15 r2 0.7
+slt r15 r2 0.25
 beqz r15 if2exit
 move r5 0
 if2exit:

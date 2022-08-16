@@ -15,11 +15,11 @@ use loop
 
 const SAFE = 1
 const UNSAFE = 0
-const MIN_PRESSURE = 50 # kPa
+const MIN_PRESSURE = 75 # kPa
 const MAX_PRESSURE = 200 # kPa
 const MIN_TEMP = 283.15 # 10℃
-const MAX_TEMP = 313.15 # 40℃
-const MIN_OXYGEN = 0.7 # 70%
+const MAX_TEMP = 323.15 # 50℃
+const MIN_OXYGEN = 0.25 # 25%
 const MAX_VOLATILES = 0.02 # 2%
 const MAX_POLLUTANT = 0.02 # 2%
 
