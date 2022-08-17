@@ -1,0 +1,81 @@
+# SIMPLE FURNACE CONTROLLER
+#
+# This controller can be used to just keep a furnace at a basic temperature
+# and pressure suitable for smelting all the standard ores into ingots.
+#
+# Temperature will be maintained between T_MIN and T_MAX.
+const T_MIN = 1000
+const T_MAX = 5000
+#
+# Pressure will be maintained between P_MIN and P_MAX.
+const P_MIN = 1000
+const P_MAX = 20000
+#
+# Attach the following devices to the IC Socket. Devices marked with a * are optional:
+#   D0  - Advanced Furnace
+#   D1* - Dump override button
+#
+# The Housing will have the following status codes:
+# -1: pumping out
+#  0: ready
+#  1: pumping in
+#  2: igniting (if this status stays for long, fuel is wrong)
+# 99: Dump has been requested
+
+###############################################################################
+use aliases
+use loop
+
+alias Furnace d0
+alias DumpButton d1
+
+const LOAD_SPEED = 10  # slowly add fuel
+const DUMP_SPEED = 100 # rapidly reduce pressure
+var state = 0
+
+# Gather facts
+var t = Furnace.Temperature
+var p = Furnace.Pressure
+var fire = Furnace.Combustion
+var dump = 0
+
+# Check if dump button has been activated
+bdseal DumpButton CheckDumpButton
+if dump == 1
+    Furnace.SettingInput = 0
+    Furnace.SettingOutput = DUMP_SPEED
+    db.Setting = 99
+    j 0
+end
+
+# Cold and empty, add fuel
+if t < T_MIN && p < P_MIN
+    Furnace.SettingInput = LOAD_SPEED
+    Furnace.SettingOutput = 0
+    state = 1
+else
+    Furnace.SettingInput = 0
+end
+
+# Cold and full enough, ignite
+if t > T_MIN && t < T_MAX && p > P_MIN && p < P_MAX && fire == 0
+    Furnace.Activate = 1
+    state = 2
+end
+
+# Too hot or too full, remove waste
+if t > T_MAX || p > P_MAX
+    Furnace.SettingInput = 0
+    Furnace.SettingOutput = DUMP_SPEED
+    state = -1
+else
+    Furnace.SettingOutput = 0
+end
+
+db.Setting = state
+
+
+###############################################################################
+function CheckDumpButton
+    dump = DumpButton.Setting
+end

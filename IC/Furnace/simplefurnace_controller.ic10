@@ -1,0 +1,60 @@
+alias state r0
+alias t r1
+alias p r2
+alias fire r3
+alias dump r4
+alias Furnace d0
+alias DumpButton d1
+move state 0
+l t Furnace Temperature
+l p Furnace Pressure
+l fire Furnace Combustion
+move dump 0
+bdseal DumpButton CheckDumpButton
+seq r15 dump 1
+beqz r15 if0exit
+s Furnace SettingInput 0
+s Furnace SettingOutput 100
+s db Setting 99
+j 0
+if0exit:
+slt r15 t 1000
+slt r14 p 1000
+and r13 r15 r14
+beqz r13 if1else
+s Furnace SettingInput 10
+s Furnace SettingOutput 0
+move state 1
+j if1exit
+if1else:
+s Furnace SettingInput 0
+if1exit:
+sgt r15 t 1000
+slt r14 t 5000
+sgt r13 p 1000
+slt r12 p 20000
+seqz r11 fire
+and r10 r15 r14
+and r10 r10 r13
+and r10 r10 r12
+and r10 r10 r11
+beqz r10 if2exit
+s Furnace Activate 1
+move state 2
+if2exit:
+sgt r15 t 5000
+sgt r14 p 20000
+or r13 r15 r14
+beqz r13 if3else
+s Furnace SettingInput 0
+s Furnace SettingOutput 100
+move state -1
+j if3exit
+if3else:
+s Furnace SettingOutput 0
+if3exit:
+s db Setting state
+j 0
+CheckDumpButton:
+l dump DumpButton Setting
+j ra
