@@ -1,0 +1,38 @@
+alias count r0
+alias c r1
+alias LED d0
+move count -1
+alias Controller d1
+bdseal Controller ReadController
+alias Controller d2
+bdseal Controller ReadController
+alias Controller d3
+bdseal Controller ReadController
+alias Controller d4
+bdseal Controller ReadController
+alias Controller d5
+bdseal Controller ReadController
+s LED On 1
+slt r15 count 1
+beqz r15 if0exit
+s LED Color 4
+if0exit:
+sgt r15 count 1
+slt r14 count 3
+and r13 r15 r14
+beqz r13 if1exit
+s LED Color 5
+if1exit:
+sgt r15 count 2
+beqz r15 if2exit
+s LED Color 6
+if2exit:
+s LED Setting count
+s db Setting count
+j 0
+ReadController:
+l c Controller Setting
+blt c 0 skip_read
+move count c
+skip_read:
+j ra

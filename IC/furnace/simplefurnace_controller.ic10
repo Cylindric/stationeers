@@ -1,0 +1,96 @@
+alias state r0
+alias t r1
+alias p r2
+alias fire r3
+alias dump r4
+alias Furnace d0
+alias DumpButton d1
+alias StatusDisplay d3
+start:
+move state -2
+l t Furnace Temperature
+l p Furnace Pressure
+l fire Furnace Combustion
+move dump 0
+bdseal DumpButton CheckDumpButton
+seq r15 dump 1
+beqz r15 if0exit
+s Furnace SettingInput 0
+s Furnace SettingOutput 100
+s Furnace Open 1
+move state 99
+bdseal StatusDisplay WriteStatus
+j start
+if0exit:
+slt r15 t 1000
+slt r14 p 1000
+and r13 r15 r14
+beqz r13 if1else
+s Furnace SettingInput 10
+s Furnace SettingOutput 0
+s Furnace Open 0
+move state 1
+j if1exit
+if1else:
+s Furnace SettingInput 0
+if1exit:
+slt r15 t 5000
+sgt r14 p 1000
+slt r13 p 20000
+seqz r12 fire
+and r11 r15 r14
+and r11 r11 r13
+and r11 r11 r12
+beqz r11 if2exit
+s Furnace Activate 1
+s Furnace Open 0
+move state 2
+if2exit:
+sgt r15 t 5000
+sgt r14 p 20000
+or r13 r15 r14
+beqz r13 if3else
+s Furnace SettingInput 0
+s Furnace SettingOutput 100
+s Furnace Open 0
+move state -1
+j if3exit
+if3else:
+s Furnace SettingOutput 0
+if3exit:
+sgt r15 t 1000
+slt r14 t 5000
+sgt r13 p 1000
+slt r12 p 20000
+seq r11 fire 1
+and r10 r15 r14
+and r10 r10 r13
+and r10 r10 r12
+and r10 r10 r11
+beqz r10 if4exit
+s Furnace SettingInput 0
+s Furnace SettingOutput 0
+s Furnace Open 1
+move state 0
+if4exit:
+bdseal StatusDisplay WriteStatus
+j start
+jr 34
+CheckDumpButton:
+l dump DumpButton Setting
+j ra
+WriteStatus:
+s StatusDisplay Setting state
+brne state -2 2
+s StatusDisplay Color 1
+brne state -1 2
+s StatusDisplay Color 5
+brne state 0 2
+s StatusDisplay Color 2
+brne state 1 2
+s StatusDisplay Color 10
+brne state 2 2
+s StatusDisplay Color 4
+brne state 99 2
+s StatusDisplay Color 3
+j ra
