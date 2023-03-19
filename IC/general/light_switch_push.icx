@@ -1,0 +1,43 @@
+# LIGHT SWITCH (PUSH BUTTON)
+#
+# Super-simple module that reads an attached Switch and toggles
+# every light it can see a button activation.
+#
+# Supports various types of light, but not all yet.
+
+use aliases
+
+const LIGHT_FLASHING = -1535893860
+const LIGHT_ROUND = 1514476632
+const LIGHT_LONG_WIDE = 555215790
+const LIGHT_LONG_ANGLED = 1847265835
+const LIGHT_ROUND_SMALL = 1436121888
+const LIGHT_WALL = -1860064656
+const SWITCH_BUTTON = 491845673
+
+var light_state = 0
+
+Start:
+
+var s = d(SWITCH_BUTTON).Setting(Sum)
+if s == 1
+    if light_state == 1
+        light_state = 0
+    else
+        light_state = 1
+    end
+    yield # debounce
+    yield # debounce
+    yield # debounce
+end
+db.Setting = light_state
+
+d(LIGHT_FLASHING).On = light_state
+d(LIGHT_ROUND).On = light_state
+d(LIGHT_LONG_WIDE).On = light_state
+d(LIGHT_LONG_ANGLED).On = light_state
+d(LIGHT_ROUND_SMALL).On = light_state
+d(LIGHT_WALL).On = light_state
+
+yield
+j Start
