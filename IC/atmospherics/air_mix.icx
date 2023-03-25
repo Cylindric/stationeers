@@ -27,7 +27,7 @@
 #                           X--------- AIR
 #   CARBON DIOXIDE --------/ 10%
 
-# use aliases
+use aliases
 use loop
 
 alias PreMixPressureSensor d0
