@@ -12,6 +12,7 @@ alias OutputPressure2 r10
 alias TotalFilter r11
 alias AverageFilter r12
 alias InputGasRatio r13
+alias input_gas_amount r14
 alias AverageFilterDisplay d0
 alias InputRatioDisplay d1
 move shutdown_timer 10
@@ -61,64 +62,61 @@ brne LeftFilterType 1037507240 2
 l InputGasRatio db RatioVolatilesInput
 brne LeftFilterType 1255156286 2
 l InputGasRatio db RatioVolatilesInput
-seq r15 2 current_state
-beqz r15 if0exit
-sgt r14 InputGasRatio 0
-beqz r14 if1exit
+mul input_gas_amount InputGasRatio InputMoles
+seq r15 current_state 2
+beqz r15 state1_exit
+sgt r15 input_gas_amount 0.0
+beqz r15 state1_exit
 move next_state 0
-if1exit:
-if0exit:
-seq r15 0 current_state
-beqz r15 if2exit
-sle r14 InputGasRatio 0
-beqz r14 if3exit
+move display_colour 0
+state1_exit:
+seq r15 current_state 0
+beqz r15 state2_exit
+sle r15 input_gas_amount 0.0
+beqz r15 state2_exit
 move next_state 3
-if3exit:
-if2exit:
-seq r15 0 current_state
-beqz r15 if4exit
-sge r14 OutputPressure 10000
-beqz r14 if5exit
-move next_state 2
-if5exit:
-if4exit:
-seq r15 3 current_state
-beqz r15 if6exit
-sgt r14 InputGasRatio 0
-beqz r14 if7exit
-move next_state 0
-if7exit:
-if6exit:
-seq r15 3 current_state
-beqz r15 if8exit
-slez r14 shutdown_timer
-beqz r14 if9exit
-move next_state 2
-if9exit:
-if8exit:
-move current_state next_state
-brne current_state 2 4
-s db Mode 0
 move display_colour 1
-move shutdown_timer 10
-brne current_state 0 3
+state2_exit:
+seq r15 current_state 0
+beqz r15 state3_exit
+sge r15 OutputPressure 10000
+beqz r15 state3_exit
+move next_state 2
+move display_colour 4
+state3_exit:
+seq r15 current_state 3
+beqz r15 state4_exit
+sgt r15 input_gas_amount 0.0
+beqz r15 state4_exit
+move next_state 0
 move display_colour 2
+state4_exit:
+seq r15 current_state 3
+beqz r15 state5_exit
+sle r15 shutdown_timer 0
+beqz r15 state5_exit
+move next_state 2
+state5_exit:
+move current_state next_state
+brne current_state 2 3
+s db Mode 0
+move shutdown_timer 10
+brne current_state 0 2
 s db Mode 1
-brne current_state 3 3
-move display_colour 3
+brne current_state 3 2
 sub shutdown_timer shutdown_timer 1
 bdseal AverageFilterDisplay displayCartridgeAverage
 bdseal InputRatioDisplay displayInputRatio
 yield
 j start
-j 0
+jr 11
 displayCartridgeAverage:
 s AverageFilterDisplay Mode 1
 s AverageFilterDisplay Setting AverageFilter
 s AverageFilterDisplay Color display_colour
 j ra
 displayInputRatio:
-s InputRatioDisplay Mode 1
-s InputRatioDisplay Setting InputGasRatio
+s InputRatioDisplay Mode 0
+s InputRatioDisplay Setting input_gas_amount
 s InputRatioDisplay Color display_colour
 j ra

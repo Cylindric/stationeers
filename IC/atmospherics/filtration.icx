@@ -14,14 +14,14 @@
 #   D0 - A console that will display current Filter Cartidge level
 #   D1 - A console that will display current input gas ratio
 
-use loop
 use aliases
+
 
 alias AverageFilterDisplay d0
 alias InputRatioDisplay d1
 
 # SETTINGS
-const MIN_INPUT_RATIO = 0
+const MIN_INPUT_MOLES = 0.0
 const MAX_OUTPUT_PRESSURE = 10000
 
 # STATES
@@ -31,11 +31,18 @@ const STATE_IDLE = 2
 const STATE_WAITING = 3
 
 # COLOURS
+const COLOR_BLUE = 0
 const COLOR_GREY = 1
 const COLOR_GREEN = 2
-const COLOR_RED = 4
-const COLOR_WHITE = 6
 const COLOR_ORANGE = 3
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+const COLOR_BLACK = 7
+const COLOR_BROWN = 8
+const COLOR_KHAKI = 9
+const COLOR_PINK = 10
+const COLOR_PURPLE = 11
 
 # CONSOLE MODE
 const MODE_DEFAULT = 0
@@ -138,66 +145,86 @@ switch LeftFilterType
     end
 end
 
+var input_gas_amount = InputGasRatio * InputMoles
 
-# STATES
-if (STATE_IDLE == current_state)
-    if (InputGasRatio > MIN_INPUT_RATIO )
-        # Idle -> Filtering
-        next_state = STATE_FILTERING
-    end
-end
+# DETERMINE NEXT STATE
+# blue:  idle->filtering
+# grey:  filtering->waiting
+# red:   filtering->idle(overp)
+# green: waiting->filtering
 
-if (STATE_FILTERING == current_state)
-    if (InputGasRatio <= MIN_INPUT_RATIO)
-        # Filtering -> Waiting
-        next_state = STATE_WAITING
-    end
-end
+# Idle -> Filtering
+seq r15 current_state STATE_IDLE # if current_state == IDLE
+beqz r15 state1_exit
+sgt r15 input_gas_amount MIN_INPUT_MOLES # If input > min_input
+beqz r15 state1_exit
+move next_state STATE_FILTERING
+display_colour = COLOR_BLUE
+state1_exit:
 
-if (STATE_FILTERING == current_state)
-    if (OutputPressure >= MAX_OUTPUT_PRESSURE)
-        # Filtering -> Idle
-        next_state = STATE_IDLE
-    end
-end
+# Filtering -> Waiting
+seq r15 current_state STATE_FILTERING # if current_state == FILTERING
+beqz r15 state2_exit
+sle r15 input_gas_amount MIN_INPUT_MOLES # if input <= min_input
+beqz r15 state2_exit
+move next_state STATE_WAITING
+display_colour = COLOR_GREY
+state2_exit:
 
-if (STATE_WAITING == current_state)
-    if (InputGasRatio > MIN_INPUT_RATIO)
-        # Waiting -> Filtering
-        next_state = STATE_FILTERING
-    end
-end
+# Filtering -> Idle
+seq r15 current_state STATE_FILTERING # if current_state == FILTERING
+beqz r15 state3_exit
+sge r15 OutputPressure MAX_OUTPUT_PRESSURE # if output >= max_output
+beqz r15 state3_exit
+move next_state STATE_IDLE
+display_colour = COLOR_RED
+state3_exit:
 
-if (STATE_WAITING == current_state)
-    if (shutdown_timer <= 0)
-        # Waiting -> Idle
-        next_state = STATE_IDLE
-    end
-end
+# Waiting -> Filtering
+seq r15 current_state STATE_WAITING # if current_state == WAITING
+beqz r15 state4_exit
+sgt r15 input_gas_amount MIN_INPUT_MOLES # If input > min_input
+beqz r15 state4_exit
+move next_state STATE_FILTERING
+display_colour = COLOR_GREEN
+state4_exit:
 
+# Waiting -> Idle
+seq r15 current_state STATE_WAITING # if current_state == WAITING
+beqz r15 state5_exit
+sle r15 shutdown_timer 0 # if timer <= 0
+beqz r15 state5_exit
+move next_state STATE_IDLE
+state5_exit:
+
+# APPLY NEXT STATE
 current_state = next_state
-switch current_state
-    case STATE_IDLE
-        db.Mode = 0
-        display_colour = COLOR_GREY
-        shutdown_timer = 10
-    end
-    case STATE_FILTERING
-        display_colour = COLOR_GREEN
-        db.Mode = 1
-    end
-    case STATE_WAITING
-        display_colour = COLOR_ORANGE
-        shutdown_timer = shutdown_timer - 1
-    end
-end
 
+brne current_state STATE_IDLE 3
+db.Mode = 0
+# display_colour = COLOR_GREY
+shutdown_timer = 10
+
+brne current_state STATE_FILTERING 2
+# display_colour = COLOR_GREEN
+db.Mode = 1
+
+brne current_state STATE_WAITING 2
+# display_colour = COLOR_ORANGE
+shutdown_timer = shutdown_timer - 1
+
+# OUTPUT VALUES TO ATTACHED DISPLAYS
 bdseal AverageFilterDisplay displayCartridgeAverage
 bdseal InputRatioDisplay displayInputRatio
+
+# LOOP BACK TO START
 yield
 j start
 
 ###############################################################################
+# FUNCTIONS
+###############################################################################
+
 function displayCartridgeAverage
     AverageFilterDisplay.Mode = MODE_PERCENTAGE
     AverageFilterDisplay.Setting = AverageFilter
@@ -205,7 +232,7 @@ function displayCartridgeAverage
 end
 
 function displayInputRatio
-    InputRatioDisplay.Mode = MODE_PERCENTAGE
-    InputRatioDisplay.Setting = InputGasRatio
+    InputRatioDisplay.Mode = MODE_DEFAULT
+    InputRatioDisplay.Setting = input_gas_amount
     InputRatioDisplay.Color = display_colour
 end
