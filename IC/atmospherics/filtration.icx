@@ -7,8 +7,8 @@
 # If the pressure on the output pipe is too high, filtration will
 # stop immediately.
 #
-# The gas ratio measured and show depends on the cartridge type
-# currently in the left slot of the Filtration device.
+# The gas ratio measured and show depends on the cartridge types
+# currently installed in the Filtration device.
 #
 # Attach the following devices to the IC Socket (*optional):
 #   D0 - A console that will display current Filter Cartidge level
@@ -16,9 +16,8 @@
 
 use aliases
 
-
-alias AverageFilterDisplay d0
-alias InputRatioDisplay d1
+alias AverageFilterQtyDisplay d0
+alias InputMolesDisplay d1
 
 # SETTINGS
 const MIN_INPUT_MOLES = 0.0
@@ -73,152 +72,107 @@ const FILTER_VOLATILE1 = 15011598
 const FILTER_VOLATILE2 = 1037507240
 const FILTER_VOLATILE3 = 1255156286
 
-var shutdown_timer = 10
-var current_state = STATE_IDLE
-var next_state = STATE_FILTERING
-var display_colour = COLOR_WHITE
+var ShutdownTimer = 10
+var CurrentState #= STATE_IDLE
+var NextState #= STATE_FILTERING
+var DisplayColour #= COLOR_WHITE
 
 start:
 
-# Read the current states
-var LeftFilterType = db.slot(FILTER_SLOT_LEFT).PrefabHash
-var LeftFilter = db.slot(FILTER_SLOT_LEFT).Quantity
-var RightFilter = db.slot(FILTER_SLOT_RIGHT).Quantity
-var InputMoles = db.TotalMolesInput
+# Read the current input and oupt states
+var TotalInputMoles = db.TotalMolesInput
 var InputPressure = db.PressureInput
 var OutputPressure = db.PressureOutput
 var OutputPressure2 = db.PressureOutput2
 max OutputPressure OutputPressure OutputPressure2
 
+# Read the current filter cartridge types and levels
+var InputGasRatio
+
+# LEFT
+var FilterType = db.slot(FILTER_SLOT_LEFT).PrefabHash
+var FilterQty = db.slot(FILTER_SLOT_LEFT).Quantity
+readGasRatio() # Reads FilterType, sets InputGasRatio
+var TotalRatio = InputGasRatio
+var TotalQty = FilterQty
+
+# RIGHT
+FilterType = db.slot(FILTER_SLOT_RIGHT).PrefabHash
+FilterQty = db.slot(FILTER_SLOT_RIGHT).Quantity
+readGasRatio() # Reads FilterType, sets InputGasRatio
+TotalRatio = TotalRatio + InputGasRatio
+TotalQty = TotalQty + FilterQty
+
 # Calculate the current filter canister state
-var TotalFilter = LeftFilter + RightFilter
-var AverageFilter = TotalFilter / 200
+var AverageFilterQty = TotalQty / 200
 
 # Read the current input ratio depending on the cartridge type
-var InputGasRatio = -1
-InputGasRatio = db.RatioOxygenInput
-switch LeftFilterType
-    case FILTER_NITROGEN1
-        InputGasRatio = db.RatioNitrogenInput
-    end
-    case FILTER_NITROGEN2
-        InputGasRatio = db.RatioNitrogenInput
-    end
-    case FILTER_NITROGEN3
-        InputGasRatio = db.RatioNitrogenInput
-    end
-    case FILTER_NITROUS1
-        InputGasRatio = db.RatioNitrousOxideInput
-    end
-    case FILTER_NITROUS2
-        InputGasRatio = db.RatioNitrousOxideInput
-    end
-    case FILTER_NITROUS3
-        InputGasRatio = db.RatioNitrousOxideInput
-    end
-    case FILTER_CARBON_DIOXIDE1
-        InputGasRatio = db.RatioCarbonDioxideInput
-    end
-    case FILTER_CARBON_DIOXIDE2
-        InputGasRatio = db.RatioCarbonDioxideInput
-    end
-    case FILTER_CARBON_DIOXIDE3    
-        InputGasRatio = db.RatioCarbonDioxideInput
-    end
-    case FILTER_POLLUTANT1
-        InputGasRatio = db.RatioPollutantInput
-    end
-    case FILTER_POLLUTANT2
-        InputGasRatio = db.RatioPollutantInput
-    end
-    case FILTER_POLLUTANT3    
-        InputGasRatio = db.RatioPollutantInput
-    end
-    case FILTER_VOLATILE1
-        InputGasRatio = db.RatioVolatilesInput
-    end
-    case FILTER_VOLATILE2
-        InputGasRatio = db.RatioVolatilesInput
-    end
-    case FILTER_VOLATILE3    
-        InputGasRatio = db.RatioVolatilesInput
-    end
-end
-
-var input_gas_amount = InputGasRatio * InputMoles
+var InputMoles = TotalRatio * TotalInputMoles
 
 # DETERMINE NEXT STATE
-# blue:  idle->filtering
-# grey:  filtering->waiting
-# red:   filtering->idle(overp)
-# green: waiting->filtering
 
 # Idle -> Filtering
-seq r15 current_state STATE_IDLE # if current_state == IDLE
+seq r15 CurrentState STATE_IDLE # if CurrentState == IDLE
 beqz r15 state1_exit
-sgt r15 input_gas_amount MIN_INPUT_MOLES # If input > min_input
+sgt r15 InputMoles MIN_INPUT_MOLES # If input > min_input
 beqz r15 state1_exit
-move next_state STATE_FILTERING
-display_colour = COLOR_BLUE
+move NextState STATE_FILTERING
 state1_exit:
 
 # Filtering -> Waiting
-seq r15 current_state STATE_FILTERING # if current_state == FILTERING
+seq r15 CurrentState STATE_FILTERING # if CurrentState == FILTERING
 beqz r15 state2_exit
-sle r15 input_gas_amount MIN_INPUT_MOLES # if input <= min_input
+sle r15 InputMoles MIN_INPUT_MOLES # if input <= min_input
 beqz r15 state2_exit
-move next_state STATE_WAITING
-display_colour = COLOR_GREY
+move NextState STATE_WAITING
 state2_exit:
 
 # Filtering -> Idle
-seq r15 current_state STATE_FILTERING # if current_state == FILTERING
+seq r15 CurrentState STATE_FILTERING # if CurrentState == FILTERING
 beqz r15 state3_exit
 sge r15 OutputPressure MAX_OUTPUT_PRESSURE # if output >= max_output
 beqz r15 state3_exit
-move next_state STATE_IDLE
-display_colour = COLOR_RED
+move NextState STATE_IDLE
 state3_exit:
 
 # Waiting -> Filtering
-seq r15 current_state STATE_WAITING # if current_state == WAITING
+seq r15 CurrentState STATE_WAITING # if CurrentState == WAITING
 beqz r15 state4_exit
-sgt r15 input_gas_amount MIN_INPUT_MOLES # If input > min_input
+sgt r15 InputMoles MIN_INPUT_MOLES # If input > min_input
 beqz r15 state4_exit
-move next_state STATE_FILTERING
-display_colour = COLOR_GREEN
+move NextState STATE_FILTERING
 state4_exit:
 
 # Waiting -> Idle
-seq r15 current_state STATE_WAITING # if current_state == WAITING
+seq r15 CurrentState STATE_WAITING # if CurrentState == WAITING
 beqz r15 state5_exit
-sle r15 shutdown_timer 0 # if timer <= 0
+sle r15 ShutdownTimer 0 # if timer <= 0
 beqz r15 state5_exit
-move next_state STATE_IDLE
+move NextState STATE_IDLE
 state5_exit:
 
 # APPLY NEXT STATE
-current_state = next_state
+CurrentState = NextState
 
-brne current_state STATE_IDLE 3
+brne CurrentState STATE_IDLE 3
 db.Mode = 0
-# display_colour = COLOR_GREY
-shutdown_timer = 10
+DisplayColour = COLOR_GREY
+ShutdownTimer = 10
 
-brne current_state STATE_FILTERING 2
-# display_colour = COLOR_GREEN
+brne CurrentState STATE_FILTERING 2
+DisplayColour = COLOR_GREEN
 db.Mode = 1
 
-brne current_state STATE_WAITING 2
-# display_colour = COLOR_ORANGE
-shutdown_timer = shutdown_timer - 1
+brne CurrentState STATE_WAITING 
+DisplayColour = COLOR_ORANGE
+ShutdownTimer = ShutdownTimer - 1
 
 # OUTPUT VALUES TO ATTACHED DISPLAYS
-bdseal AverageFilterDisplay displayCartridgeAverage
-bdseal InputRatioDisplay displayInputRatio
+bdseal AverageFilterQtyDisplay displayCartridgeAverage
+bdseal InputMolesDisplay displayInputRatio
 
 # LOOP BACK TO START
-yield
+sleep 1
 j start
 
 ###############################################################################
@@ -226,13 +180,41 @@ j start
 ###############################################################################
 
 function displayCartridgeAverage
-    AverageFilterDisplay.Mode = MODE_PERCENTAGE
-    AverageFilterDisplay.Setting = AverageFilter
-    AverageFilterDisplay.Color = display_colour
+    AverageFilterQtyDisplay.Mode = MODE_PERCENTAGE
+    AverageFilterQtyDisplay.Setting = AverageFilterQty
+    AverageFilterQtyDisplay.Color = DisplayColour
 end
 
 function displayInputRatio
-    InputRatioDisplay.Mode = MODE_DEFAULT
-    InputRatioDisplay.Setting = input_gas_amount
-    InputRatioDisplay.Color = display_colour
+    InputMolesDisplay.Mode = MODE_DEFAULT
+    InputMolesDisplay.Setting = InputMoles
+    InputMolesDisplay.Color = DisplayColour
+end
+
+function readGasRatio
+    InputGasRatio = 0
+    breq FilterType FILTER_OXYGEN1 3 # If small oxy
+    breq FilterType FILTER_OXYGEN2 2 # If med oxy
+    brne FilterType FILTER_OXYGEN3 2 # if not big oxy
+    l InputGasRatio db RatioOxygenInput
+    breq FilterType FILTER_NITROGEN1 3 # If small n2
+    breq FilterType FILTER_NITROGEN2 2 # If med n2
+    brne FilterType FILTER_NITROGEN3 2 # if not big n2
+    l InputGasRatio db RatioNitrogenInput
+    breq FilterType FILTER_NITROUS1 3 # If small no2
+    breq FilterType FILTER_NITROUS2 2 # If med no2
+    brne FilterType FILTER_NITROUS3 2 # if not big no2
+    l InputGasRatio db RatioNitrousOxideInput
+    breq FilterType FILTER_CARBON_DIOXIDE1 3 # If small co2
+    breq FilterType FILTER_CARBON_DIOXIDE2 2 # If med co2
+    brne FilterType FILTER_CARBON_DIOXIDE3 2 # if not big co2
+    l InputGasRatio db RatioCarbonDioxideInput
+    breq FilterType FILTER_POLLUTANT1 3 # If small x
+    breq FilterType FILTER_POLLUTANT2 2 # If med x
+    brne FilterType FILTER_POLLUTANT3 2 # if not big x
+    l InputGasRatio db RatioPollutantInput
+    breq FilterType FILTER_VOLATILE1 3 # If small V
+    breq FilterType FILTER_VOLATILE2 2 # If med V
+    brne FilterType FILTER_VOLATILE3 2 # if not big V
+    l InputGasRatio db RatioVolatilesInput
 end
