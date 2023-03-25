@@ -1,0 +1,124 @@
+alias shutdown_timer r0
+alias current_state r1
+alias next_state r2
+alias display_colour r3
+alias LeftFilterType r4
+alias LeftFilter r5
+alias RightFilter r6
+alias InputMoles r7
+alias InputPressure r8
+alias OutputPressure r9
+alias OutputPressure2 r10
+alias TotalFilter r11
+alias AverageFilter r12
+alias InputGasRatio r13
+alias AverageFilterDisplay d0
+alias InputRatioDisplay d1
+move shutdown_timer 10
+move current_state 2
+move next_state 0
+move display_colour 6
+start:
+ls LeftFilterType db 1 PrefabHash
+ls LeftFilter db 1 Quantity
+ls RightFilter db 0 Quantity
+l InputMoles db TotalMolesInput
+l InputPressure db PressureInput
+l OutputPressure db PressureOutput
+l OutputPressure2 db PressureOutput2
+max OutputPressure OutputPressure OutputPressure2
+add TotalFilter LeftFilter RightFilter
+div AverageFilter TotalFilter 200
+move InputGasRatio -1
+l InputGasRatio db RatioOxygenInput
+brne LeftFilterType 632853248 2
+l InputGasRatio db RatioNitrogenInput
+brne LeftFilterType -632657357 2
+l InputGasRatio db RatioNitrogenInput
+brne LeftFilterType -1387439451 2
+l InputGasRatio db RatioNitrogenInput
+brne LeftFilterType -1247674305 2
+l InputGasRatio db RatioNitrousOxideInput
+brne LeftFilterType 1824284061 2
+l InputGasRatio db RatioNitrousOxideInput
+brne LeftFilterType 465267979 2
+l InputGasRatio db RatioNitrousOxideInput
+brne LeftFilterType 1635000764 2
+l InputGasRatio db RatioCarbonDioxideInput
+brne LeftFilterType 416897318 2
+l InputGasRatio db RatioCarbonDioxideInput
+brne LeftFilterType 1876847024 2
+l InputGasRatio db RatioCarbonDioxideInput
+brne LeftFilterType 1915566057 2
+l InputGasRatio db RatioPollutantInput
+brne LeftFilterType 63677771 2
+l InputGasRatio db RatioPollutantInput
+brne LeftFilterType 1959564765 2
+l InputGasRatio db RatioPollutantInput
+brne LeftFilterType 15011598 2
+l InputGasRatio db RatioVolatilesInput
+brne LeftFilterType 1037507240 2
+l InputGasRatio db RatioVolatilesInput
+brne LeftFilterType 1255156286 2
+l InputGasRatio db RatioVolatilesInput
+seq r15 2 current_state
+beqz r15 if0exit
+sgt r14 InputGasRatio 0
+beqz r14 if1exit
+move next_state 0
+if1exit:
+if0exit:
+seq r15 0 current_state
+beqz r15 if2exit
+sle r14 InputGasRatio 0
+beqz r14 if3exit
+move next_state 3
+if3exit:
+if2exit:
+seq r15 0 current_state
+beqz r15 if4exit
+sge r14 OutputPressure 10000
+beqz r14 if5exit
+move next_state 2
+if5exit:
+if4exit:
+seq r15 3 current_state
+beqz r15 if6exit
+sgt r14 InputGasRatio 0
+beqz r14 if7exit
+move next_state 0
+if7exit:
+if6exit:
+seq r15 3 current_state
+beqz r15 if8exit
+slez r14 shutdown_timer
+beqz r14 if9exit
+move next_state 2
+if9exit:
+if8exit:
+move current_state next_state
+brne current_state 2 4
+s db Mode 0
+move display_colour 1
+move shutdown_timer 10
+brne current_state 0 3
+move display_colour 2
+s db Mode 1
+brne current_state 3 3
+move display_colour 3
+sub shutdown_timer shutdown_timer 1
+bdseal AverageFilterDisplay displayCartridgeAverage
+bdseal InputRatioDisplay displayInputRatio
+yield
+j start
+j 0
+displayCartridgeAverage:
+s AverageFilterDisplay Mode 1
+s AverageFilterDisplay Setting AverageFilter
+s AverageFilterDisplay Color display_colour
+j ra
+displayInputRatio:
+s InputRatioDisplay Mode 1
+s InputRatioDisplay Setting InputGasRatio
+s InputRatioDisplay Color display_colour
+j ra

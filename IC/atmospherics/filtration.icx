@@ -1,0 +1,211 @@
+# FILTRATION MODULE
+# To be installed into Atmospherics Filtration Units
+#
+# If the ratio of the filtered gas in the input is too low, then
+# filtration will pause (after a short delay).
+#
+# If the pressure on the output pipe is too high, filtration will
+# stop immediately.
+#
+# The gas ratio measured and show depends on the cartridge type
+# currently in the left slot of the Filtration device.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0 - A console that will display current Filter Cartidge level
+#   D1 - A console that will display current input gas ratio
+
+use loop
+use aliases
+
+alias AverageFilterDisplay d0
+alias InputRatioDisplay d1
+
+# SETTINGS
+const MIN_INPUT_RATIO = 0
+const MAX_OUTPUT_PRESSURE = 10000
+
+# STATES
+const STATE_FILTERING = 0
+const STATE_OVERPRESSURE = 1
+const STATE_IDLE = 2
+const STATE_WAITING = 3
+
+# COLOURS
+const COLOR_GREY = 1
+const COLOR_GREEN = 2
+const COLOR_RED = 4
+const COLOR_WHITE = 6
+const COLOR_ORANGE = 3
+
+# CONSOLE MODE
+const MODE_DEFAULT = 0
+const MODE_PERCENTAGE = 1
+const MODE_POWER = 2
+
+# FILTRATION SLOTS
+const FILTER_SLOT_RIGHT = 0
+const FILTER_SLOT_LEFT = 1
+
+# FILTER CANISTERS
+const FILTER_CARBON_DIOXIDE1 = 1635000764
+const FILTER_CARBON_DIOXIDE2 = 416897318
+const FILTER_CARBON_DIOXIDE3 = 1876847024
+const FILTER_NITROGEN1 = 632853248
+const FILTER_NITROGEN2 = -632657357
+const FILTER_NITROGEN3 = -1387439451
+const FILTER_NITROUS1 = -1247674305
+const FILTER_NITROUS2 = 1824284061
+const FILTER_NITROUS3 = 465267979
+const FILTER_OXYGEN1 = -721824748
+const FILTER_OXYGEN2 = -1067319543
+const FILTER_OXYGEN3 = -1217998945
+const FILTER_POLLUTANT1 = 1915566057
+const FILTER_POLLUTANT2 = 63677771
+const FILTER_POLLUTANT3 = 1959564765
+const FILTER_VOLATILE1 = 15011598
+const FILTER_VOLATILE2 = 1037507240
+const FILTER_VOLATILE3 = 1255156286
+
+var shutdown_timer = 10
+var current_state = STATE_IDLE
+var next_state = STATE_FILTERING
+var display_colour = COLOR_WHITE
+
+start:
+
+# Read the current states
+var LeftFilterType = db.slot(FILTER_SLOT_LEFT).PrefabHash
+var LeftFilter = db.slot(FILTER_SLOT_LEFT).Quantity
+var RightFilter = db.slot(FILTER_SLOT_RIGHT).Quantity
+var InputMoles = db.TotalMolesInput
+var InputPressure = db.PressureInput
+var OutputPressure = db.PressureOutput
+var OutputPressure2 = db.PressureOutput2
+max OutputPressure OutputPressure OutputPressure2
+
+# Calculate the current filter canister state
+var TotalFilter = LeftFilter + RightFilter
+var AverageFilter = TotalFilter / 200
+
+# Read the current input ratio depending on the cartridge type
+var InputGasRatio = -1
+InputGasRatio = db.RatioOxygenInput
+switch LeftFilterType
+    case FILTER_NITROGEN1
+        InputGasRatio = db.RatioNitrogenInput
+    end
+    case FILTER_NITROGEN2
+        InputGasRatio = db.RatioNitrogenInput
+    end
+    case FILTER_NITROGEN3
+        InputGasRatio = db.RatioNitrogenInput
+    end
+    case FILTER_NITROUS1
+        InputGasRatio = db.RatioNitrousOxideInput
+    end
+    case FILTER_NITROUS2
+        InputGasRatio = db.RatioNitrousOxideInput
+    end
+    case FILTER_NITROUS3
+        InputGasRatio = db.RatioNitrousOxideInput
+    end
+    case FILTER_CARBON_DIOXIDE1
+        InputGasRatio = db.RatioCarbonDioxideInput
+    end
+    case FILTER_CARBON_DIOXIDE2
+        InputGasRatio = db.RatioCarbonDioxideInput
+    end
+    case FILTER_CARBON_DIOXIDE3    
+        InputGasRatio = db.RatioCarbonDioxideInput
+    end
+    case FILTER_POLLUTANT1
+        InputGasRatio = db.RatioPollutantInput
+    end
+    case FILTER_POLLUTANT2
+        InputGasRatio = db.RatioPollutantInput
+    end
+    case FILTER_POLLUTANT3    
+        InputGasRatio = db.RatioPollutantInput
+    end
+    case FILTER_VOLATILE1
+        InputGasRatio = db.RatioVolatilesInput
+    end
+    case FILTER_VOLATILE2
+        InputGasRatio = db.RatioVolatilesInput
+    end
+    case FILTER_VOLATILE3    
+        InputGasRatio = db.RatioVolatilesInput
+    end
+end
+
+
+# STATES
+if (STATE_IDLE == current_state)
+    if (InputGasRatio > MIN_INPUT_RATIO )
+        # Idle -> Filtering
+        next_state = STATE_FILTERING
+    end
+end
+
+if (STATE_FILTERING == current_state)
+    if (InputGasRatio <= MIN_INPUT_RATIO)
+        # Filtering -> Waiting
+        next_state = STATE_WAITING
+    end
+end
+
+if (STATE_FILTERING == current_state)
+    if (OutputPressure >= MAX_OUTPUT_PRESSURE)
+        # Filtering -> Idle
+        next_state = STATE_IDLE
+    end
+end
+
+if (STATE_WAITING == current_state)
+    if (InputGasRatio > MIN_INPUT_RATIO)
+        # Waiting -> Filtering
+        next_state = STATE_FILTERING
+    end
+end
+
+if (STATE_WAITING == current_state)
+    if (shutdown_timer <= 0)
+        # Waiting -> Idle
+        next_state = STATE_IDLE
+    end
+end
+
+current_state = next_state
+switch current_state
+    case STATE_IDLE
+        db.Mode = 0
+        display_colour = COLOR_GREY
+        shutdown_timer = 10
+    end
+    case STATE_FILTERING
+        display_colour = COLOR_GREEN
+        db.Mode = 1
+    end
+    case STATE_WAITING
+        display_colour = COLOR_ORANGE
+        shutdown_timer = shutdown_timer - 1
+    end
+end
+
+bdseal AverageFilterDisplay displayCartridgeAverage
+bdseal InputRatioDisplay displayInputRatio
+yield
+j start
+
+###############################################################################
+function displayCartridgeAverage
+    AverageFilterDisplay.Mode = MODE_PERCENTAGE
+    AverageFilterDisplay.Setting = AverageFilter
+    AverageFilterDisplay.Color = display_colour
+end
+
+function displayInputRatio
+    InputRatioDisplay.Mode = MODE_PERCENTAGE
+    InputRatioDisplay.Setting = InputGasRatio
+    InputRatioDisplay.Color = display_colour
+end
