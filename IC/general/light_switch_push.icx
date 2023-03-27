@@ -2,6 +2,8 @@
 #
 # Super-simple module that reads an attached Switch and toggles
 # every light it can see a button activation.
+# If an occupancy sensor is found, then an occupant will always
+# force the light on.
 #
 # Supports various types of light, but not all yet.
 
@@ -14,13 +16,25 @@ const LIGHT_LONG_ANGLED = 1847265835
 const LIGHT_ROUND_SMALL = 1436121888
 const LIGHT_WALL = -1860064656
 const SWITCH_BUTTON = 491845673
+const SENSOR_OCCUPANCY = 322782515
 
 var light_state = 0
 
 Start:
 
-var s = d(SWITCH_BUTTON).Setting(Sum)
-if s == 1
+# Any occupants will turn the lights on
+var occupants = d(SENSOR_OCCUPANCY).Quantity(Sum)
+if occupants > 0
+    light_state = 1
+else
+    light_state = 0
+end
+
+# Switches can toggle the light on or off,
+# but the occupancy sensor (if present) will
+# override any "off" signals
+var switch = d(SWITCH_BUTTON).Setting(Sum)
+if switch == 1
     if light_state == 1
         light_state = 0
     else
@@ -30,7 +44,8 @@ if s == 1
     yield # debounce
     yield # debounce
 end
-db.Setting = light_state
+
+db.Setting = occupants
 
 d(LIGHT_FLASHING).On = light_state
 d(LIGHT_ROUND).On = light_state

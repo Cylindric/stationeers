@@ -1,22 +1,31 @@
 alias light_state r0
-alias s r1
+alias occupants r1
+alias switch r2
 move light_state 0
 Start:
-lb s 491845673 Setting Sum
-seq r15 s 1
-beqz r15 if0exit
-seq r14 light_state 1
-beqz r14 if1else
-move light_state 0
-j if1exit
-if1else:
+lb occupants 322782515 Quantity Sum
+sgtz r15 occupants
+beqz r15 if0else
 move light_state 1
-if1exit:
-yield
-yield
-yield
+j if0exit
+if0else:
+move light_state 0
 if0exit:
-s db Setting light_state
+lb switch 491845673 Setting Sum
+seq r15 switch 1
+beqz r15 if1exit
+seq r14 light_state 1
+beqz r14 if2else
+move light_state 0
+j if2exit
+if2else:
+move light_state 1
+if2exit:
+yield
+yield
+yield
+if1exit:
+s db Setting occupants
 sb -1535893860 On light_state
 sb 1514476632 On light_state
 sb 555215790 On light_state
