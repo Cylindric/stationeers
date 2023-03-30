@@ -1,0 +1,12 @@
+alias InputTemperature r0
+alias FillPump d0
+alias InputSensor d1
+l InputTemperature InputSensor Temperature
+sle r15 InputTemperature 473
+beqz r15 if0else
+s FillPump On 1
+j if0exit
+if0else:
+s FillPump On 0
+if0exit:
+j 0
