@@ -10,6 +10,7 @@ alias FilterQty r8
 alias AverageFilterQty r9
 alias AverageFilterQtyDisplay d0
 alias StatusLight d1
+move DisplayColour 1
 start:
 l InputTemperature db TemperatureInput
 l OutputPressure db PressureOutput

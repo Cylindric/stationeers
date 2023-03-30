@@ -49,7 +49,7 @@ const FILTER_SLOT_LEFT = 1
 
 var CurrentState #= STATE_IDLE
 var NextState #= STATE_FILTERING
-var DisplayColour #= COLOR_WHITE
+var DisplayColour = COLOR_GREY
 
 start:
 
