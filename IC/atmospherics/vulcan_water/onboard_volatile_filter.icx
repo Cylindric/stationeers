@@ -1,0 +1,126 @@
+# FILTRATION MODULE
+# To be installed into Atmospherics Filtration Units
+#
+# If the pressure on the output pipe is too high, filtration will
+# stop immediately.
+#
+# If the temperature on the output pipe is too high, filtration will
+# stop immediately.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0 - A console that will display current Filter Cartidge level
+#   D1 - A light that will display current state
+
+use aliases
+
+alias AverageFilterQtyDisplay d0
+alias StatusLight d1
+
+# SETTINGS
+const MAX_INPUT_TEMPERATURE = 473 # 473K=200C
+const MAX_OUTPUT_PRESSURE = 1000
+
+# STATES
+const STATE_FILTERING = 0
+const STATE_IDLE = 1
+
+# COLOURS
+const COLOR_BLUE = 0
+const COLOR_GREY = 1
+const COLOR_GREEN = 2
+const COLOR_ORANGE = 3
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+const COLOR_BLACK = 7
+const COLOR_BROWN = 8
+const COLOR_KHAKI = 9
+const COLOR_PINK = 10
+const COLOR_PURPLE = 11
+
+# CONSOLE MODE
+const MODE_DEFAULT = 0
+const MODE_PERCENTAGE = 1
+const MODE_POWER = 2
+
+# FILTRATION SLOTS
+const FILTER_SLOT_RIGHT = 0
+const FILTER_SLOT_LEFT = 1
+
+var CurrentState #= STATE_IDLE
+var NextState #= STATE_FILTERING
+var DisplayColour #= COLOR_WHITE
+
+start:
+
+# Read the current input and oupt states
+var InputTemperature = db.TemperatureInput
+var OutputPressure = db.PressureOutput
+var OutputPressure2 = db.PressureOutput2
+max OutputPressure OutputPressure OutputPressure2
+
+# Read the filter cartridge status
+var Filter1Qty = db.slot(FILTER_SLOT_LEFT).Quantity
+var Filter2Qty = db.slot(FILTER_SLOT_RIGHT).Quantity
+var FilterQty
+FilterQty = Filter1Qty + Filter2Qty
+
+# Calculate the current filter canister state
+var AverageFilterQty = FilterQty / 200
+
+###############################################################################
+# DETERMINE NEXT STATE
+###############################################################################
+
+# Default to "running"
+NextState = STATE_FILTERING
+DisplayColour = COLOR_GREEN
+
+# If there's too much output, stop
+if OutputPressure >= MAX_OUTPUT_PRESSURE
+    NextState = STATE_IDLE
+    DisplayColour = COLOR_GREY
+end
+
+# If the input is too hot, stop
+if InputTemperature >= MAX_INPUT_TEMPERATURE
+    NextState = STATE_IDLE
+    DisplayColour = COLOR_RED
+end
+
+###############################################################################
+# APPLY NEXT STATE
+###############################################################################
+if NextState == STATE_IDLE
+    db.Mode = 0
+end
+if NextState == STATE_FILTERING
+    db.Mode = 1
+end
+CurrentState = NextState
+
+###############################################################################
+# OUTPUT VALUES TO ATTACHED DISPLAYS
+###############################################################################
+bdseal AverageFilterQtyDisplay displayCartridgeAverage
+bdseal StatusLight displayStatus
+
+###############################################################################
+# LOOP BACK TO START
+###############################################################################
+sleep 1
+j start
+
+###############################################################################
+# FUNCTIONS
+###############################################################################
+
+function displayCartridgeAverage
+    AverageFilterQtyDisplay.Mode = MODE_PERCENTAGE
+    AverageFilterQtyDisplay.Setting = AverageFilterQty
+    AverageFilterQtyDisplay.Color = DisplayColour
+end
+
+function displayStatus
+    StatusLight.Color = DisplayColour
+end

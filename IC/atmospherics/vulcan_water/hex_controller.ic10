@@ -1,0 +1,33 @@
+alias mode r0
+alias InputTemperature r1
+alias RadiatorTemperature r2
+alias RadiatorPressure r3
+alias pump_state r4
+alias FillPump d0
+alias DrainPump d1
+alias InputSensor d2
+alias RadiatorSensor d3
+move mode 0
+s FillPump Setting 800
+s DrainPump Setting 1000
+s DrainPump On 1
+l InputTemperature d1 Temperature
+l RadiatorTemperature d2 Temperature
+l RadiatorPressure d2 Pressure
+move pump_state 1
+seq r15 mode 0
+beqz r15 if0exit
+sgt r14 InputTemperature RadiatorTemperature
+beqz r14 if1exit
+move pump_state 0
+if1exit:
+if0exit:
+seq r15 mode 1
+beqz r15 if2exit
+slt r14 InputTemperature RadiatorTemperature
+beqz r14 if3exit
+move pump_state 0
+if3exit:
+if2exit:
+s FillPump On pump_state
+j 0

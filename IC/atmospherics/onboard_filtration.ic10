@@ -1,21 +1,19 @@
-alias ShutdownTimer r0
-alias CurrentState r1
-alias NextState r2
-alias DisplayColour r3
-alias TotalInputMoles r4
-alias InputPressure r5
-alias OutputPressure r6
-alias OutputPressure2 r7
-alias InputGasRatio r8
-alias FilterType r9
-alias FilterQty r10
-alias TotalRatio r11
-alias TotalQty r12
-alias AverageFilterQty r13
-alias InputMoles r14
+alias CurrentState r0
+alias NextState r1
+alias DisplayColour r2
+alias TotalInputMoles r3
+alias InputPressure r4
+alias OutputPressure r5
+alias OutputPressure2 r6
+alias InputGasRatio r7
+alias FilterType r8
+alias FilterQty r9
+alias TotalRatio r10
+alias TotalQty r11
+alias AverageFilterQty r12
+alias InputMoles r13
 alias AverageFilterQtyDisplay d0
 alias InputMolesDisplay d1
-move ShutdownTimer 10
 start:
 l TotalInputMoles db TotalMolesInput
 l InputPressure db PressureInput
@@ -34,47 +32,26 @@ add TotalRatio TotalRatio InputGasRatio
 add TotalQty TotalQty FilterQty
 div AverageFilterQty TotalQty 200
 mul InputMoles TotalRatio TotalInputMoles
-seq r15 CurrentState 2
-beqz r15 state1_exit
-sgt r15 InputMoles 0.0
-beqz r15 state1_exit
 move NextState 0
-state1_exit:
-seq r15 CurrentState 0
-beqz r15 state2_exit
-sle r15 InputMoles 0.0
-beqz r15 state2_exit
-move NextState 3
-state2_exit:
-seq r15 CurrentState 0
-beqz r15 state3_exit
-sge r15 OutputPressure 10000
-beqz r15 state3_exit
-move NextState 2
-state3_exit:
-seq r15 CurrentState 3
-beqz r15 state4_exit
-sgt r15 InputMoles 0.0
-beqz r15 state4_exit
-move NextState 0
-state4_exit:
-seq r15 CurrentState 3
-beqz r15 state5_exit
-sle r15 ShutdownTimer 0
-beqz r15 state5_exit
-move NextState 2
-state5_exit:
+slt r15 InputMoles 0.0
+beqz r15 if0exit
+move NextState 1
+if0exit:
+sge r15 OutputPressure 1000
+beqz r15 if1exit
+move NextState 1
+if1exit:
 move CurrentState NextState
-brne CurrentState 2 3
+seq r15 NextState 1
+beqz r15 if2exit
 s db Mode 0
 move DisplayColour 1
-move ShutdownTimer 10
-brne CurrentState 0 2
+if2exit:
+seq r15 NextState 0
+beqz r15 if3exit
 move DisplayColour 2
 s db Mode 1
-brne CurrentState 3
-move DisplayColour 3
-sub ShutdownTimer ShutdownTimer 1
+if3exit:
 bdseal AverageFilterQtyDisplay displayCartridgeAverage
 bdseal InputMolesDisplay displayInputRatio
 sleep 1

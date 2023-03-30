@@ -1,0 +1,55 @@
+alias CurrentState r0
+alias NextState r1
+alias DisplayColour r2
+alias InputTemperature r3
+alias OutputPressure r4
+alias OutputPressure2 r5
+alias Filter1Qty r6
+alias Filter2Qty r7
+alias FilterQty r8
+alias AverageFilterQty r9
+alias AverageFilterQtyDisplay d0
+alias StatusLight d1
+start:
+l InputTemperature db TemperatureInput
+l OutputPressure db PressureOutput
+l OutputPressure2 db PressureOutput2
+max OutputPressure OutputPressure OutputPressure2
+ls Filter1Qty db 1 Quantity
+ls Filter2Qty db 0 Quantity
+add FilterQty Filter1Qty Filter2Qty
+div AverageFilterQty FilterQty 200
+move NextState 0
+move DisplayColour 2
+sge r15 OutputPressure 1000
+beqz r15 if0exit
+move NextState 1
+move DisplayColour 1
+if0exit:
+sge r15 InputTemperature 473
+beqz r15 if1exit
+move NextState 1
+move DisplayColour 4
+if1exit:
+seq r15 NextState 1
+beqz r15 if2exit
+s db Mode 0
+if2exit:
+seq r15 NextState 0
+beqz r15 if3exit
+s db Mode 1
+if3exit:
+move CurrentState NextState
+bdseal AverageFilterQtyDisplay displayCartridgeAverage
+bdseal StatusLight displayStatus
+sleep 1
+j start
+jr 9
+displayCartridgeAverage:
+s AverageFilterQtyDisplay Mode 1
+s AverageFilterQtyDisplay Setting AverageFilterQty
+s AverageFilterQtyDisplay Color DisplayColour
+j ra
+displayStatus:
+s StatusLight Color DisplayColour
+j ra
