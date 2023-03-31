@@ -57,23 +57,18 @@ var CoolingPressure = CoolingSensor.Pressure
 # Assume that the radiator loop is enabled
 var fill_pump_state = 1
 var drain_pump_state = 1
+DisplayColour = COLOR_GREEN
 
 if RadiatorTemperature > InputTemperature
     # Turn off the loop if it's hotter in the radiator than the input
     fill_pump_state = 0
+    drain_pump_state = 0
     DisplayColour = COLOR_RED
-end
-
-if fill_pump_state == 1
-    if CoolingPressure < MIN_RADIATOR_PRESSURE
-        # If the radiator loop is empty, keep filling without emptying
-        drain_pump_state = 0
-        DisplayColour = COLOR_YELLOW
-    end
 end
 
 if CoolingPressure >= MAX_RADIATOR_PRESSURE
     # Always turn off the loop if it's dangerously full
+    fill_pump_state = 0
     drain_pump_state = 1
     DisplayColour = COLOR_ORANGE
 end

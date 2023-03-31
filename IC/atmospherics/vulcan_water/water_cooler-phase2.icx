@@ -1,0 +1,43 @@
+# On the same network as this IC, place:
+#
+# * A Daylight Sensor - horizontally with the cable pointing South
+# * A Gas Sensor
+# * Any number of Extendable Water Radiators (Large or Medium)
+
+use aliases
+use loop
+
+alias WaterSensor d0
+
+###############################################################################
+# GLOBAL CONSTANTS
+###############################################################################
+
+const SENSOR_DAYLIGHT = 1076425094
+const SENSOR_GAS = -1252983604
+const WATER_RADIATOR_EXTENDABLE_LARGE = -566775170
+const WATER_RADIATOR_EXTENDABLE_MEDIUM = -1141760613
+
+###############################################################################
+# START
+###############################################################################
+
+# Read the current state of the system
+var WaterTemperature = WaterSensor.Temperature
+var AmbientTemperature = d(SENSOR_GAS).Temperature(Maximum)
+var SunAngle = d(SENSOR_DAYLIGHT).Horizontal(Maximum)
+
+###############################################################################
+# DETERMINE NEXT STATE
+###############################################################################
+
+var extend = 1
+
+if AmbientTemperature >= WaterTemperature
+    extend = 0
+end
+
+d(WATER_RADIATOR_EXTENDABLE_LARGE).Open = extend
+d(WATER_RADIATOR_EXTENDABLE_LARGE).Horizontal = SunAngle
+d(WATER_RADIATOR_EXTENDABLE_MEDIUM).Open = extend
+d(WATER_RADIATOR_EXTENDABLE_MEDIUM).Horizontal = SunAngle

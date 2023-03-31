@@ -16,6 +16,10 @@ const MAX_WASTE_PRESSURE = 1000
 const MIN_INPUT_PRESSURE = 500
 const MAX_INPUT_PRESSURE = 1000
 
+###############################################################################
+# GLOBAL CONSTANTS
+###############################################################################
+
 # COLOURS
 const COLOR_BLUE = 0
 const COLOR_GREY = 1
@@ -36,26 +40,30 @@ const COLOR_PURPLE = 11
 
 var CombustorState = 1
 var MixerState = 1
+var DisplayColour = COLOR_GREEN
 
 # If the water tank is full, stop combusting
 if OutputPressure > MAX_OUTPUT_PRESSURE
     CombustorState = 0
+    DisplayColour = COLOR_ORANGE
 end
 
 # If the water is too hot, stop combusting
 if OutputTemperature > MAX_OUTPUT_TEMPERATURE
     CombustorState = 0
+    DisplayColour = COLOR_RED
 end
 
 # If the waste output is full, stop combusting
 if WastePressure > MAX_WASTE_PRESSURE
     CombustorState = 0
+    DisplayColour = COLOR_YELLOW
 end
 
-# If there is too much fuel on the input, stop mixing
-if InputPressure >= MIN_INPUT_PRESSURE
-    MixerState = 0
-end
+# # If there is too much fuel on the input, stop mixing
+# if InputPressure >= MIN_INPUT_PRESSURE
+#     MixerState = 0
+# end
 
 ###############################################################################
 # APPLY NEXT STATE
@@ -99,16 +107,5 @@ function EnableMixer
 end
 
 function UpdateStateDisplay
-    if MixerState == 1 && CombustorState == 1
-        StateDisplay.Color = COLOR_GREEN
-    end
-    if MixerState == 1 && CombustorState == 0
-        StateDisplay.Color = COLOR_ORANGE
-    end
-    if MixerState == 0 && CombustorState == 1
-        StateDisplay.Color = COLOR_YELLOW
-    end
-    if MixerState == 0 && CombustorState == 0
-        StateDisplay.Color = COLOR_RED
-    end
+    StateDisplay.Color = DisplayColour
 end

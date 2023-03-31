@@ -1,0 +1,18 @@
+alias WaterTemperature r0
+alias AmbientTemperature r1
+alias SunAngle r2
+alias extend r3
+alias WaterSensor d0
+l WaterTemperature WaterSensor Temperature
+lb AmbientTemperature -1252983604 Temperature Maximum
+lb SunAngle 1076425094 Horizontal Maximum
+move extend 1
+sge r15 AmbientTemperature WaterTemperature
+beqz r15 if0exit
+move extend 0
+if0exit:
+sb -566775170 Open extend
+sb -566775170 Horizontal SunAngle
+sb -1141760613 Open extend
+sb -1141760613 Horizontal SunAngle
+j 0

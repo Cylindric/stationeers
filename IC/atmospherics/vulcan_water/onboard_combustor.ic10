@@ -4,6 +4,7 @@ alias OutputTemperature r2
 alias WastePressure r3
 alias CombustorState r4
 alias MixerState r5
+alias DisplayColour r6
 alias InputMixer d0
 alias StateDisplay d1
 l InputPressure db PressureInput
@@ -12,36 +13,36 @@ l OutputTemperature db TemperatureOutput
 l WastePressure db PressureOutput2
 move CombustorState 1
 move MixerState 1
+move DisplayColour 2
 sgt r15 OutputPressure 1000
 beqz r15 if0exit
 move CombustorState 0
+move DisplayColour 3
 if0exit:
 sgt r15 OutputTemperature 500
 beqz r15 if1exit
 move CombustorState 0
+move DisplayColour 4
 if1exit:
 sgt r15 WastePressure 1000
 beqz r15 if2exit
 move CombustorState 0
+move DisplayColour 5
 if2exit:
-sge r15 InputPressure 500
-beqz r15 if3exit
-move MixerState 0
-if3exit:
 seq r15 MixerState 1
-beqz r15 if4else
+beqz r15 if3else
 jal EnableMixer
+j if3exit
+if3else:
+jal DisableMixer
+if3exit:
+seq r15 CombustorState 1
+beqz r15 if4else
+jal EnableCombustor
 j if4exit
 if4else:
-jal DisableMixer
-if4exit:
-seq r15 CombustorState 1
-beqz r15 if5else
-jal EnableCombustor
-j if5exit
-if5else:
 jal DisableCombustor
-if5exit:
+if4exit:
 jal UpdateStateDisplay
 j 0
 DisableCombustor:
@@ -57,28 +58,5 @@ EnableMixer:
 s InputMixer On 1
 j ra
 UpdateStateDisplay:
-seq r15 MixerState 1
-seq r14 CombustorState 1
-and r13 r15 r14
-beqz r13 if6exit
-s StateDisplay Color 2
-if6exit:
-seq r15 MixerState 1
-seqz r14 CombustorState
-and r13 r15 r14
-beqz r13 if7exit
-s StateDisplay Color 3
-if7exit:
-seqz r15 MixerState
-seq r14 CombustorState 1
-and r13 r15 r14
-beqz r13 if8exit
-s StateDisplay Color 5
-if8exit:
-seqz r15 MixerState
-seqz r14 CombustorState
-and r13 r15 r14
-beqz r13 if9exit
-s StateDisplay Color 4
-if9exit:
+s StateDisplay Color DisplayColour
 j ra
