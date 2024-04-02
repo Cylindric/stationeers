@@ -1,0 +1,102 @@
+# VENDING MACHINE COUNT CONTROLLER
+#
+# The Setting for this IC will be set to the current Quantity held in the found
+# Vending Machine. If not found, it will be set to "-1", so a batch-read "Max" 
+# or a "find greatest" will return the valid count.
+#
+# If the count will be multiplied by the relevant MULTI var, to give a total
+# count instead of a stack count.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0  - The Hash Controller
+#   D1* - Vending Machine 1
+#   D2* - Vending Machine 2
+#   D3* - Vending Machine 3
+#   D4* - Vending Machine 4
+#   D5* - Vending Machine 5
+
+use aliases
+use loop
+sp = 0
+
+###############################################################################
+# Uncomment one of the blocks below to match the 5 Vending Machines attached
+# to this Controller.
+###############################################################################
+# push -404336834  # copper ingot
+# push 50          # copper ingot stack size
+# push -1406385572 # nickel ingot
+# push 50          # nickel ingot stack size
+# push -929742000  # silver ingot
+# push 50          # silver ingot stack size
+# push -290196476  # silicon ingot
+# push 50          # silicon ingot stack size
+# push -1301215609 # iron ingot
+# push 100         # iron ingot stack size
+###############################################################################
+# push 226410516   # gold ingot
+# push 50
+# push 2134647745  # lead ingot
+# push 50
+# push -654790771  # steel ingot
+# push 50
+# push 1058547521  # constantan ingot
+# push 25
+# push -297990285  # invar ingot
+# push 25
+###############################################################################
+push 502280180   # electrum ingot
+push 25
+push -82508479   # solder ingot
+push 25
+###############################################################################
+#push 412924554   # astroloy ingot
+#push 25
+#push 1579842814  # hastelloy ingot
+#push 25
+#push -787796599  # inconel ingot
+#push 25
+#push -1897868623 # stellite ingot
+#push 25
+###############################################################################
+
+alias Controller d0
+
+var hash
+var multi
+
+start:
+
+var requestedHash = Controller.Setting
+var found = 0
+
+# Check each Vending machine in turn
+alias Vending d5
+bdseal d5 ProcessVending
+
+alias Vending d4
+bdseal d4 ProcessVending
+
+alias Vending d3
+bdseal d3 ProcessVending
+
+alias Vending d2
+bdseal d2 ProcessVending
+
+alias Vending d1
+bdseal d1 ProcessVending
+
+if found == 0
+    db.Setting = -1
+end
+
+function ProcessVending
+    pop multi
+    pop hash
+    if requestedHash == hash
+        var qty = Vending.Quantity
+        qty = qty * multi
+        found = 1
+        db.Setting = qty
+    end
+end

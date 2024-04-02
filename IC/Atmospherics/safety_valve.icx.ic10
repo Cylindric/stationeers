@@ -1,10 +1,13 @@
 alias CurrentPressure r0
+alias CurrentTemperature r1
 alias PressureSensor d0
 alias DumpValve d1
 alias FeedValve d2
 alias OverPressureIndicator d3
 alias UnderPressureIndicator d4
+alias ChillerValve d5
 l CurrentPressure PressureSensor Pressure
+l CurrentTemperature PressureSensor Temperature
 sgt r15 CurrentPressure 9000.0
 beqz r15 if0exit
 bdseal DumpValve EnableDumpValve
@@ -19,12 +22,26 @@ bdseal FeedValve EnableFeedValve
 bdseal OverPressureIndicator DisableOverPressureIndicator
 bdseal UnderPressureIndicator EnableOverPressureIndicator
 if1exit:
+sgt r15 CurrentTemperature 226.14999999999998
+beqz r15 if2exit
+bdseal ChillerValve EnableChillerValve
+if2exit:
+slt r15 CurrentTemperature 222.14999999999998
+beqz r15 if3exit
+bdseal ChillerValve DisableChillerValve
+if3exit:
 j 0
 EnableDumpValve:
 s DumpValve On 1
 j ra
 DisableDumpValve:
 s DumpValve On 0
+j ra
+EnableChillerValve:
+s ChillerValve On 1
+j ra
+DisableChillerValve:
+s ChillerValve On 0
 j ra
 EnableFeedValve:
 s FeedValve On 1

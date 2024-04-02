@@ -1,0 +1,82 @@
+# SIMPLE FURNACE ORE FEEDER
+# 
+# When activated, keeps feeing ore until the type of ore
+# changes, then it stops until re-triggered.
+
+use aliases
+
+# SORTER MODES
+const MODE_LOGIC = 2
+
+# SORTER SLOTS
+const SLOT_IMPORT = 0
+const OUTPUT_LEFT = 1 # left facing the export slots
+const OUTPUT_RIGHT = 0 # right facting the export slots
+
+const ORE_GOLD = -1348105509
+const ORE_IRON = 1758427767
+const ORE_LEAD = -190236170
+const ORE_NICKEL = 1830218956
+const ORE_SILICON = 1103972403
+const ORE_SILVER = -916518678
+
+# Output states
+const STATE_GARBAGE = -1
+const STATE_IDLE = 0
+const STATE_OUTPUTTING = 1
+const STATE_WAITING = 2
+
+alias Sorter d0
+alias BusMemory d1
+
+var previous_ore_hash
+var this_ore_hash
+
+# Logic Mode prevents the sorter from doing anything
+# automatically, so we can control where stuff goes.
+Sorter.Mode = MODE_LOGIC
+
+start:
+
+# Have we been activated? (Assume yes if no bus memory configured)
+var active = 1
+bdseal BusMemory CheckBusMemory
+
+# Is anything sitting in the input slot?
+var input = Sorter.slot(SLOT_IMPORT).PrefabHash
+
+# If there's nothing there, just keep waiting
+if input == 0
+    db.Setting = STATE_IDLE
+    yield
+    j start
+end
+
+# We only want to process smeltable ores, anything else is garbage
+if input == ORE_GOLD || input == ORE_IRON || input == ORE_LEAD || input == ORE_NICKEL || input == ORE_SILICON || input == ORE_SILVER
+    this_ore_hash = input
+else
+    Sorter.Output = OUTPUT_LEFT
+    db.Setting = STATE_GARBAGE
+end
+
+# If this ore hash is the same as the previous one, spit it out, otherwise wait
+if active == 1 || previous_ore_hash == 0 || this_ore_hash == previous_ore_hash
+    bdseal BusMemory ClearBusMemory
+    Sorter.Output = OUTPUT_RIGHT
+    previous_ore_hash = this_ore_hash
+    db.Setting = STATE_OUTPUTTING
+else
+    db.Setting = STATE_WAITING
+end
+
+j start
+
+###############################################################################
+function CheckBusMemory
+    active = BusMemory.Setting
+end
+
+function ClearBusMemory
+    BusMemory.Setting = 0
+end

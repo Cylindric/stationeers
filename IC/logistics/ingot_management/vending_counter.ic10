@@ -1,0 +1,40 @@
+alias hash r0
+alias multi r1
+alias requestedHash r2
+alias found r3
+alias qty r4
+move sp 0
+push 502280180
+push 25
+push -82508479
+push 25
+alias Controller d0
+start:
+l requestedHash Controller Setting
+move found 0
+alias Vending d5
+bdseal d5 ProcessVending
+alias Vending d4
+bdseal d4 ProcessVending
+alias Vending d3
+bdseal d3 ProcessVending
+alias Vending d2
+bdseal d2 ProcessVending
+alias Vending d1
+bdseal d1 ProcessVending
+seqz r15 found
+beqz r15 if0exit
+s db Setting -1
+if0exit:
+j 0
+ProcessVending:
+pop multi
+pop hash
+seq r15 requestedHash hash
+beqz r15 if1exit
+l qty Vending Quantity
+mul qty qty multi
+move found 1
+s db Setting qty
+if1exit:
+j ra

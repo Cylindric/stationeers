@@ -1,0 +1,91 @@
+# AIR CONDITIONING
+#
+# Keeps a gas tank at a constant temperature by turning on and off a heater or radiator.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0  - Gas Temperature sensor (either a Pipe Analyser or a Tank)
+#   D1* - A cooling device (or switch to enable several)
+#   D2* - A heating device (or switch to enable several)
+#
+# It's possible to add an indicator pointing at this IC Housing for the following states:
+#
+#  0 - Idle
+#  1 - Heating
+#  2 - Cooling
+#  3 - Over Pressure
+
+use aliases
+
+alias TemperatureSensor d0
+alias CoolingDevice d1
+alias HeatingDevice d2
+
+const LOW_TEMP = 15 + 274.15
+const HIGH_TEMP = 20 + 274.15
+const MAX_PRESSURE = 30000
+
+const STATE_IDLE = 0
+const STATE_HEATING = 1
+const STATE_COOLING = 2
+const STATE_OVERPRESSURE = 3
+
+var state = STATE_IDLE
+
+loop:
+
+# Read current temperature
+var CurrentTemperature = TemperatureSensor.Temperature
+var CurrentPressure = TemperatureSensor.Pressure
+
+# Too hot
+if CurrentTemperature > HIGH_TEMP
+    state = STATE_COOLING
+end
+
+# Too cold
+if CurrentTemperature < LOW_TEMP
+    state = STATE_HEATING
+end
+
+# Prevent heating causing over-pressure
+# (This is only a problem if heating is required)
+if CurrentPressure > MAX_PRESSURE && state == STATE_HEATING
+    state = STATE_OVERPRESSURE
+end
+
+
+# Apply the state
+switch state
+    case STATE_HEATING
+        bdseal HeatingDevice EnableHeaters
+        bdseal CoolingDevice DisableCooling
+    end
+    case STATE_COOLING
+        bdseal HeatingDevice DisableHeaters
+        bdseal CoolingDevice EnableCooling
+    end
+    case STATE_OVERPRESSURE
+        bdseal HeatingDevice DisableHeaters
+    end
+end
+
+# Show the state on the housing
+db.Setting = state
+
+j loop
+
+function EnableHeaters
+    HeatingDevice.On = 1
+end
+
+function DisableHeaters
+    HeatingDevice.On = 0
+end
+
+function EnableCooling
+    CoolingDevice.On = 1
+end
+
+function DisableCooling
+    CoolingDevice.On = 0
+end

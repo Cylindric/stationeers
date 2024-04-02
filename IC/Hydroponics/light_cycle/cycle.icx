@@ -1,0 +1,17 @@
+use loop
+
+const HYDROPONICS_STATION = 1441767298
+const GROWLIGHT = -1758710260
+
+const DARK_TIME = 60 * 2 # 1 real-time minute
+const LIGHT_TIME = 60 * 2 # 1 real-time minute
+
+d(GROWLIGHT).On = 1
+d(HYDROPONICS_STATION).On = 1
+db.Setting = 1
+sleep LIGHT_TIME
+
+d(GROWLIGHT).On = 0
+d(HYDROPONICS_STATION).On = 0
+db.Setting = 0
+sleep DARK_TIME

@@ -1,0 +1,57 @@
+alias previous_ore_hash r0
+alias this_ore_hash r1
+alias active r2
+alias input r3
+alias Sorter d0
+alias BusMemory d1
+s Sorter Mode 2
+start:
+move active 1
+bdseal BusMemory CheckBusMemory
+ls input Sorter 0 PrefabHash
+seqz r15 input
+beqz r15 if0exit
+s db Setting 0
+yield
+j start
+if0exit:
+seq r15 input -1348105509
+seq r14 input 1758427767
+seq r13 input -190236170
+seq r12 input 1830218956
+seq r11 input 1103972403
+seq r10 input -916518678
+or r9 r15 r14
+or r9 r9 r13
+or r9 r9 r12
+or r9 r9 r11
+or r9 r9 r10
+beqz r9 if1else
+move this_ore_hash input
+j if1exit
+if1else:
+s Sorter Output 1
+s db Setting -1
+if1exit:
+seq r15 active 1
+seqz r14 previous_ore_hash
+seq r13 this_ore_hash previous_ore_hash
+or r12 r15 r14
+or r12 r12 r13
+beqz r12 if2else
+bdseal BusMemory ClearBusMemory
+s Sorter Output 0
+move previous_ore_hash this_ore_hash
+s db Setting 1
+j if2exit
+if2else:
+s db Setting 2
+if2exit:
+j start
+jr 7
+CheckBusMemory:
+l active BusMemory Setting
+j ra
+ClearBusMemory:
+s BusMemory Setting 0
+j ra

@@ -1,5 +1,37 @@
 # @author: ZeroFunExMachina
 # @modified: 2022.06.05.2330
+#
+# * 10 - Initializing
+# * 11 - Initializing and found 1 panel type on network
+# * 12 - Initializing and found 2 panel types on network
+# * 13 - Initializing and found 3 panel types on network
+# * 14 - Initializing and found 4 panel types on network
+# * 15 - Initializing and found 5 panel types on network
+# * 20 - Tracking
+# * 30 - Resting
+# * 90 - Maintaining
+#
+# Setup:
+# =========================
+# Install the daylight sensor horizontally, with the top of the sensor facing 
+# North (0 degrees), the data port is facing south (180 degrees). The daylight
+# sensor must be receiving direct sunlight throughout the day so be careful not
+# to place it in shadow. Solar panels should be installed so they are facing North
+# when zero'd out (0 degrees horizontal, 15 degrees vertical). If there is only
+# a single Daylight Sensor on the network and you do not wish to take advantage
+# of the optional features, no additional setup is required. The script will use
+# batch commands to operate correctly.
+#
+# If there is more than one Daylight Sensor you must set the correct sensor to
+# the correct pin. Otherwise set the IC housing pins as labeled in game (described
+# below):
+# * d0 - Sensor (Daylight Sensor - optional*)
+# * d1 - MaintSwitch (Switch - optional)
+# * d2 - AvgRatioOut (LED Display - Efficiency, optional)
+# * d3 - TotChargeOut (LED Display - Power Output, optional)
+# * d4 - HAngleOut (Horiztonal angle output, optional)
+# * d5 - VAngleOut (Vertical angle output, optional)
+#
 #--------------------------------------------------
 s db Setting 10 # set state initializing
 #--------------------------------------------------

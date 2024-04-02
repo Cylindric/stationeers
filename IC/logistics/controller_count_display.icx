@@ -1,0 +1,45 @@
+use aliases
+
+alias LED d0
+
+const COLOR_GREEN  = 2
+const COLOR_RED    = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE  = 6
+
+# Get current controller counts
+var count = -1
+alias Controller d1
+bdseal Controller ReadController
+alias Controller d2
+bdseal Controller ReadController
+alias Controller d3
+bdseal Controller ReadController
+alias Controller d4
+bdseal Controller ReadController
+alias Controller d5
+bdseal Controller ReadController
+
+# Output the count
+LED.On = 1
+if count < 1
+    LED.Color = COLOR_RED
+end
+if count > 1 && count < 3
+    LED.Color = COLOR_YELLOW
+end
+if count > 2
+    LED.Color = COLOR_WHITE
+end
+LED.Setting = count
+db.Setting = count
+
+j 0
+
+###############################################################################
+ReadController:
+    var c = Controller.Setting
+    blt c 0 skip_read
+    count = c
+    skip_read:
+    j ra

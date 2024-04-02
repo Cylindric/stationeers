@@ -20,31 +20,38 @@ sgt r14 N2Pressure 501
 and r13 r15 r14
 beqz r13 if0else
 move input_ok 1
+s db Setting 4
 j if0exit
 if0else:
 move input_ok 0
+s db Setting 5
 if0exit:
 seqz r15 input_ok
 beqz r15 if1exit
 s PreMixerValve On 0
+s db Setting 1
 if1exit:
 sgt r15 PremixPressure 8500.0
 beqz r15 if2exit
 s PreMixerValve On 0
+s db Setting 2
 if2exit:
 seq r15 input_ok 1
 slt r14 PremixPressure 8500.0
 and r13 r15 r14
 beqz r13 if3exit
 s PreMixerValve On 1
+s db Setting 3
 if3exit:
 sgt r15 AirPressure 8500.0
 beqz r15 if4exit
 s AirMixerValve On 0
+s db Setting 6
 if4exit:
 slt r15 AirPressure 8500.0
 beqz r15 if5exit
 s AirMixerValve On 1
+s db Setting 7
 if5exit:
 yield
 j 0

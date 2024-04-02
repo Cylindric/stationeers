@@ -3,6 +3,21 @@
 # This controller can be used to just keep a furnace at a basic temperature
 # and pressure suitable for smelting all the standard ores into ingots.
 #
+# Attach the following devices to the IC Socket. Devices marked with a * are optional:
+#   D0  - Advanced Furnace
+#   D1* - Dump override button
+#   D2* - Bus Memory for feed controller
+#   D3* - Status code display
+#
+# The Housing will have the following status codes:
+# -2: no action
+# -1: pumping out
+#  0: ready
+#  1: pumping in
+#  2: igniting (if this status stays for long, fuel is wrong)
+# 99: Dump has been requested
+#
+#
 # Temperature will be maintained between T_MIN and T_MAX.
 const T_MIN = 1000
 const T_MAX = 5000
@@ -11,27 +26,32 @@ const T_MAX = 5000
 const P_MIN = 1000
 const P_MAX = 20000
 #
-# Attach the following devices to the IC Socket. Devices marked with a * are optional:
-#   D0  - Advanced Furnace
-#   D1* - Dump override button
-#
-# The Housing will have the following status codes:
-# -1: pumping out
-#  0: ready
-#  1: pumping in
-#  2: igniting (if this status stays for long, fuel is wrong)
-# 99: Dump has been requested
 
 ###############################################################################
 use aliases
-use loop
 
 alias Furnace d0
 alias DumpButton d1
+alias StatusDisplay d3
 
 const LOAD_SPEED = 10  # slowly add fuel
 const DUMP_SPEED = 100 # rapidly reduce pressure
-var state = 0
+const COLOR_BLUE = 0
+const COLOR_GREY = 1
+const COLOR_GREEN = 2
+const COLOR_ORANGE = 3
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+const COLOR_BLACK = 7
+const COLOR_BROWN = 8
+const COLOR_KHAKI = 9
+const COLOR_PINK = 10
+const COLOR_PURPLE = 11
+
+start:
+
+var state = -2
 
 # Gather facts
 var t = Furnace.Temperature
@@ -44,22 +64,26 @@ bdseal DumpButton CheckDumpButton
 if dump == 1
     Furnace.SettingInput = 0
     Furnace.SettingOutput = DUMP_SPEED
-    db.Setting = 99
-    j 0
+    Furnace.Open = 1
+    state = 99
+    bdseal StatusDisplay WriteStatus
+    j start
 end
 
 # Cold and empty, add fuel
 if t < T_MIN && p < P_MIN
     Furnace.SettingInput = LOAD_SPEED
     Furnace.SettingOutput = 0
+    Furnace.Open = 0
     state = 1
 else
     Furnace.SettingInput = 0
 end
 
 # Cold and full enough, ignite
-if t > T_MIN && t < T_MAX && p > P_MIN && p < P_MAX && fire == 0
+if t < T_MAX && p > P_MIN && p < P_MAX && fire == 0
     Furnace.Activate = 1
+    Furnace.Open = 0
     state = 2
 end
 
@@ -67,15 +91,48 @@ end
 if t > T_MAX || p > P_MAX
     Furnace.SettingInput = 0
     Furnace.SettingOutput = DUMP_SPEED
+    Furnace.Open = 0
     state = -1
 else
     Furnace.SettingOutput = 0
 end
 
-db.Setting = state
+# ignited, hot enough hot and not too full; ready to cook
+if t > T_MIN && t < T_MAX && p > P_MIN && p < P_MAX && fire == 1
+    Furnace.SettingInput = 0
+    Furnace.SettingOutput = 0
+    Furnace.Open = 1
+    state = 0
+end
 
+bdseal StatusDisplay WriteStatus
+j start
 
 ###############################################################################
 function CheckDumpButton
     dump = DumpButton.Setting
+end
+
+function WriteStatus
+    StatusDisplay.Setting = state
+    switch state
+        case -2
+            StatusDisplay.Color = COLOR_GREY
+        end
+        case -1
+            StatusDisplay.Color = COLOR_YELLOW
+        end
+        case 0
+            StatusDisplay.Color = COLOR_GREEN
+        end
+        case 1
+            StatusDisplay.Color = COLOR_PINK
+        end
+        case 2
+            StatusDisplay.Color = COLOR_RED
+        end
+        case 99
+            StatusDisplay.Color = COLOR_ORANGE
+        end
+    end
 end

@@ -1,0 +1,9 @@
+sb -1758710260 On 1
+sb 1441767298 On 1
+s db Setting 1
+sleep 120
+sb -1758710260 On 0
+sb 1441767298 On 0
+s db Setting 0
+sleep 120
+j 0

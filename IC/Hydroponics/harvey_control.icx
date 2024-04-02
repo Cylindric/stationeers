@@ -14,7 +14,7 @@
 #   D5 - Hydroponic Bay Three
 
 use aliases
-use loop
+
 
 const GROWLIGHT = -1758710260
 const BAY_PLANTSLOT = 0
@@ -22,6 +22,8 @@ const BAY_EMPTY = -1
 const BAY_MATURE = 1
 const HARVEY_INPUTSLOT = 0
 
+const SLEEP = 6
+const LIGHT_TOGGLE_COUNT = 10 # 10 times SLEEP
 
 alias Harvey1 d0
 alias Harvey2 d1
@@ -30,6 +32,11 @@ alias Harvey3 d2
 alias Bay1 d3
 alias Bay2 d4
 alias Bay3 d5
+
+var LightTimer = LIGHT_TOGGLE_COUNT
+var LightState = 1
+
+start:
 
 var Mature1 = Bay1.slot(BAY_PLANTSLOT).Mature
 var Mature2 = Bay2.slot(BAY_PLANTSLOT).Mature
@@ -50,13 +57,26 @@ if Mature3 == BAY_EMPTY && SeedsReady3 > 0
     Harvey3.Plant = 1
 end
 
-sleep 4
+sleep SLEEP
 
-# Turn on grow-lights if any bays need it
+# Toggle the desired light state
+LightTimer = LightTimer - 1
+if LightTimer <= 0
+    if LightState == 0
+        LightState = 1
+    else
+        LightState = 0
+    end
+    LightTimer = LIGHT_TOGGLE_COUNT
+end
+
+# Turn off grow-lights if no bays need it
 if Mature1 == BAY_EMPTY && Mature2 == BAY_EMPTY && Mature3 == BAY_EMPTY
     d(GROWLIGHT).On = 0
+    db.Setting = -1
 else
-    d(GROWLIGHT).On = 1
+    d(GROWLIGHT).On = LightState
+    db.Setting = LightTimer
 end
 
 # Harvest plants from mature bays
@@ -70,3 +90,4 @@ if Mature3 == BAY_MATURE
     Harvey3.Harvest = 1
 end
 
+j start

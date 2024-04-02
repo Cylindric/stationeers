@@ -20,7 +20,7 @@
 #   D2* - Feed valve (the valve or mixer that is causing the over-pressure)
 #   D3* - Over-Pressure Indicator (something like a Light)
 #   D4* - Under-Pressure Indicator (something like a Light)
-#
+#   D5* - Chiller valve (either active cooling device or a valve)
 
 use loop
 use aliases
@@ -30,13 +30,16 @@ alias DumpValve d1
 alias FeedValve d2
 alias OverPressureIndicator d3
 alias UnderPressureIndicator d4
+alias ChillerValve d5
 
 const MaxPressure = 9000.0
 const MinPressure = 8500.0
-
+const ChillMinTemperature = -52 + 274.15
+const ChillMaxTemperature = -48 + 274.15
 
 # Read current pressure value
 var CurrentPressure = PressureSensor.Pressure
+var CurrentTemperature = PressureSensor.Temperature
 
 # If pressure is high, open dump valve
 if CurrentPressure > MaxPressure
@@ -54,6 +57,16 @@ if CurrentPressure < MinPressure
     bdseal UnderPressureIndicator EnableOverPressureIndicator
 end
 
+# If temperature is high, open the chiller valve
+if CurrentTemperature > ChillMaxTemperature
+    bdseal ChillerValve EnableChillerValve
+end
+
+# If temperature is low, close the chiller valve
+if CurrentTemperature < ChillMinTemperature
+    bdseal ChillerValve DisableChillerValve
+end
+
 #################################################################
 
 function EnableDumpValve
@@ -62,6 +75,14 @@ end
 
 function DisableDumpValve
     DumpValve.On = 0
+end
+
+function EnableChillerValve
+    ChillerValve.On = 1
+end
+
+function DisableChillerValve
+    ChillerValve.On = 0
 end
 
 function EnableFeedValve

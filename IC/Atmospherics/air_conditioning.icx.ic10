@@ -1,0 +1,47 @@
+alias state r0
+alias CurrentTemperature r1
+alias CurrentPressure r2
+alias TemperatureSensor d0
+alias CoolingDevice d1
+alias HeatingDevice d2
+move state 0
+loop:
+l CurrentTemperature TemperatureSensor Temperature
+l CurrentPressure TemperatureSensor Pressure
+sgt r15 CurrentTemperature 294.15
+beqz r15 if0exit
+move state 2
+if0exit:
+slt r15 CurrentTemperature 289.15
+beqz r15 if1exit
+move state 1
+if1exit:
+sgt r15 CurrentPressure 30000
+seq r14 state 1
+and r13 r15 r14
+beqz r13 if2exit
+move state 3
+if2exit:
+brne state 1 3
+bdseal HeatingDevice EnableHeaters
+bdseal CoolingDevice DisableCooling
+brne state 2 3
+bdseal HeatingDevice DisableHeaters
+bdseal CoolingDevice EnableCooling
+brne state 3 2
+bdseal HeatingDevice DisableHeaters
+s db Setting state
+j loop
+jr 13
+EnableHeaters:
+s HeatingDevice On 1
+j ra
+DisableHeaters:
+s HeatingDevice On 0
+j ra
+EnableCooling:
+s CoolingDevice On 1
+j ra
+DisableCooling:
+s CoolingDevice On 0
+j ra

@@ -57,23 +57,28 @@ bdseal NitrogenSensor ReadNitrogenPressure
 # Make sure there's enough supply gas on the input side
 if O2Pressure > MIN_O2_PRESSURE && N2Pressure > MIN_N2_PRESSURE
     input_ok = 1
+    db.Setting = 4
 else
     input_ok = 0
+    db.Setting = 5
 end
 
 # If there is not enough supply gas, stop mixing
 if input_ok == 0
     PreMixerValve.On = 0
+    db.Setting = 1
 end
 
 # If there is enough PreMix, stop mixing
 if PremixPressure > MIN_PRESSURE
     PreMixerValve.On = 0
+    db.Setting = 2
 end
 
 # If there is not enough PreMix, enable mixing
 if input_ok == 1 && PremixPressure < MIN_PRESSURE
     PreMixerValve.On = 1
+    db.Setting = 3
 end
 
 ##################
@@ -85,11 +90,13 @@ end
 # If there is enough Air, stop mixing
 if AirPressure > MIN_PRESSURE
     AirMixerValve.On = 0
+    db.Setting = 6
 end
 
 # If there is not enough Air, enable mixing
 if AirPressure < MIN_PRESSURE
     AirMixerValve.On = 1
+    db.Setting = 7
 end
 
 yield
