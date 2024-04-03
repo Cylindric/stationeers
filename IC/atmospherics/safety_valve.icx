@@ -34,8 +34,8 @@ alias ChillerValve d5
 
 const MaxPressure = 9000.0
 const MinPressure = 8500.0
-const ChillMinTemperature = -52 + 274.15
-const ChillMaxTemperature = -48 + 274.15
+const ChillMinTemperature = 19 + 274.15
+const ChillMaxTemperature = 21 + 274.15
 
 # Read current pressure value
 var CurrentPressure = PressureSensor.Pressure

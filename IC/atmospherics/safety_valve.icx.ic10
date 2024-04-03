@@ -22,11 +22,11 @@ bdseal FeedValve EnableFeedValve
 bdseal OverPressureIndicator DisableOverPressureIndicator
 bdseal UnderPressureIndicator EnableOverPressureIndicator
 if1exit:
-sgt r15 CurrentTemperature 226.14999999999998
+sgt r15 CurrentTemperature 295.15
 beqz r15 if2exit
 bdseal ChillerValve EnableChillerValve
 if2exit:
-slt r15 CurrentTemperature 222.14999999999998
+slt r15 CurrentTemperature 293.15
 beqz r15 if3exit
 bdseal ChillerValve DisableChillerValve
 if3exit:
