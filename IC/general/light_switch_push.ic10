@@ -1,0 +1,36 @@
+alias light_state r0
+alias occupants r1
+alias switch r2
+move light_state 0
+Start:
+lb occupants 322782515 Quantity Sum
+sgtz r15 occupants
+beqz r15 if0else
+move light_state 1
+j if0exit
+if0else:
+move light_state 0
+if0exit:
+lb switch 491845673 Setting Sum
+seq r15 switch 1
+beqz r15 if1exit
+seq r14 light_state 1
+beqz r14 if2else
+move light_state 0
+j if2exit
+if2else:
+move light_state 1
+if2exit:
+yield
+yield
+yield
+if1exit:
+s db Setting occupants
+sb -1535893860 On light_state
+sb 1514476632 On light_state
+sb 555215790 On light_state
+sb 1847265835 On light_state
+sb 1436121888 On light_state
+sb -1860064656 On light_state
+yield
+j Start

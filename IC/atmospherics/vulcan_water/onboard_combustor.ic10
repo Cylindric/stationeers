@@ -1,0 +1,62 @@
+alias InputPressure r0
+alias OutputPressure r1
+alias OutputTemperature r2
+alias WastePressure r3
+alias CombustorState r4
+alias MixerState r5
+alias DisplayColour r6
+alias InputMixer d0
+alias StateDisplay d1
+l InputPressure db PressureInput
+l OutputPressure db PressureOutput
+l OutputTemperature db TemperatureOutput
+l WastePressure db PressureOutput2
+move CombustorState 1
+move MixerState 1
+move DisplayColour 2
+sgt r15 OutputPressure 1000
+beqz r15 if0exit
+move CombustorState 0
+move DisplayColour 3
+if0exit:
+sgt r15 OutputTemperature 500
+beqz r15 if1exit
+move CombustorState 0
+move DisplayColour 4
+if1exit:
+sgt r15 WastePressure 1000
+beqz r15 if2exit
+move CombustorState 0
+move DisplayColour 5
+if2exit:
+seq r15 MixerState 1
+beqz r15 if3else
+jal EnableMixer
+j if3exit
+if3else:
+jal DisableMixer
+if3exit:
+seq r15 CombustorState 1
+beqz r15 if4else
+jal EnableCombustor
+j if4exit
+if4else:
+jal DisableCombustor
+if4exit:
+jal UpdateStateDisplay
+j 0
+DisableCombustor:
+s db Mode 0
+j ra
+EnableCombustor:
+s db Mode 0
+j ra
+DisableMixer:
+s InputMixer On 0
+j ra
+EnableMixer:
+s InputMixer On 1
+j ra
+UpdateStateDisplay:
+s StateDisplay Color DisplayColour
+j ra

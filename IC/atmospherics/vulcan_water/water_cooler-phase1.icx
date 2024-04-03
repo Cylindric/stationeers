@@ -1,0 +1,91 @@
+use aliases
+use loop
+
+alias FillPump d0
+alias DrainPump d1
+alias InputSensor d2
+alias CoolingSensor d3
+alias RadiatorSensor d4
+alias StatusDisplay d5
+
+const MIN_RADIATOR_PRESSURE = 0
+const MAX_RADIATOR_PRESSURE = 3000
+
+###############################################################################
+# GLOBAL CONSTANTS
+###############################################################################
+
+# COLOURS
+const COLOR_BLUE = 0
+const COLOR_GREY = 1
+const COLOR_GREEN = 2
+const COLOR_ORANGE = 3
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+const COLOR_BLACK = 7
+const COLOR_BROWN = 8
+const COLOR_KHAKI = 9
+const COLOR_PINK = 10
+const COLOR_PURPLE = 11
+
+###############################################################################
+# START
+###############################################################################
+
+var DisplayColour = COLOR_GREEN
+
+# Make sure that the system is always draining
+# faster than it's filling to prevent excessive
+# excitement.
+var MaxDrain = DrainPump.Maximum
+DrainPump.Setting = MaxDrain
+
+var MaxFill = MaxDrain * 0.9
+FillPump.Setting = MaxFill
+
+# Read the current state of the system
+var InputTemperature = InputSensor.Temperature
+var CoolingTemperature = CoolingSensor.Temperature
+var RadiatorTemperature = RadiatorSensor.Temperature
+var CoolingPressure = CoolingSensor.Pressure
+
+###############################################################################
+# DETERMINE NEXT STATE
+###############################################################################
+
+# Assume that the radiator loop is enabled
+var fill_pump_state = 1
+var drain_pump_state = 1
+DisplayColour = COLOR_GREEN
+
+if RadiatorTemperature > InputTemperature
+    # Turn off the loop if it's hotter in the radiator than the input
+    fill_pump_state = 0
+    drain_pump_state = 0
+    DisplayColour = COLOR_RED
+end
+
+if CoolingPressure >= MAX_RADIATOR_PRESSURE
+    # Always turn off the loop if it's dangerously full
+    fill_pump_state = 0
+    drain_pump_state = 1
+    DisplayColour = COLOR_ORANGE
+end
+
+###############################################################################
+# APPLY NEXT STATE
+###############################################################################
+FillPump.On = fill_pump_state
+DrainPump.On = drain_pump_state
+bdseal StatusDisplay SetStatusDisplay
+db.Setting = DisplayColour
+
+###############################################################################
+# FUNCTIONS
+###############################################################################
+
+function SetStatusDisplay
+    StatusDisplay.On = fill_pump_state
+    StatusDisplay.Color = DisplayColour
+end

@@ -1,0 +1,52 @@
+alias TargetOxygenRatio r0
+alias TargetNitrogenRatio r1
+alias TargetCO2Ratio r2
+alias TargetPressure r3
+alias pressure r4
+alias oxygen r5
+alias nitrogen r6
+alias co2 r7
+alias OxygenVent d0
+alias NitrogenVent d1
+alias CO2Vent d2
+move TargetOxygenRatio 0.27
+move TargetNitrogenRatio 0.63
+move TargetCO2Ratio 0.1
+move TargetPressure 100
+lb pressure -1252983604 Pressure Average
+lb oxygen -1252983604 RatioOxygen Average
+lb nitrogen -1252983604 RatioNitrogen Average
+lb co2 -1252983604 RatioCarbonDioxide Average
+sge r15 pressure TargetPressure
+beqz r15 if0else
+jal StopAll
+j if0exit
+if0else:
+sgt r14 oxygen TargetOxygenRatio
+beqz r14 if1else
+s OxygenVent On 0
+j if1exit
+if1else:
+s OxygenVent On 1
+if1exit:
+sgt r14 nitrogen TargetNitrogenRatio
+beqz r14 if2else
+s NitrogenVent On 0
+j if2exit
+if2else:
+s NitrogenVent On 1
+if2exit:
+sgt r14 co2 TargetCO2Ratio
+beqz r14 if3else
+s CO2Vent On 0
+j if3exit
+if3else:
+s CO2Vent On 1
+if3exit:
+if0exit:
+j 0
+StopAll:
+s OxygenVent On 0
+s NitrogenVent On 0
+s CO2Vent On 0
+j ra

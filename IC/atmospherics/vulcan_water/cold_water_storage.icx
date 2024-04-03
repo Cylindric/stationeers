@@ -1,0 +1,24 @@
+use aliases
+use loop
+
+alias FillPump d0
+alias InputSensor d1
+
+const MAX_TEMPERATURE = 473 # 473K=200C
+
+###############################################################################
+# START
+###############################################################################
+
+# Read the current state of the system
+var InputTemperature = InputSensor.Temperature
+
+###############################################################################
+# DETERMINE NEXT STATE
+###############################################################################
+
+if InputTemperature <= MAX_TEMPERATURE
+    FillPump.On = 1
+else
+    FillPump.On = 0
+end

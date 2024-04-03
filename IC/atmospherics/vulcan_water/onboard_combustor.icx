@@ -1,0 +1,111 @@
+use aliases
+use loop
+
+alias InputMixer d0
+alias StateDisplay d1
+
+
+var InputPressure = db.PressureInput
+var OutputPressure = db.PressureOutput
+var OutputTemperature = db.TemperatureOutput
+var WastePressure = db.PressureOutput2
+
+const MAX_OUTPUT_PRESSURE = 1000
+const MAX_OUTPUT_TEMPERATURE = 500 # 500K=227C
+const MAX_WASTE_PRESSURE = 1000
+const MIN_INPUT_PRESSURE = 500
+const MAX_INPUT_PRESSURE = 1000
+
+###############################################################################
+# GLOBAL CONSTANTS
+###############################################################################
+
+# COLOURS
+const COLOR_BLUE = 0
+const COLOR_GREY = 1
+const COLOR_GREEN = 2
+const COLOR_ORANGE = 3
+const COLOR_RED = 4
+const COLOR_YELLOW = 5
+const COLOR_WHITE = 6
+const COLOR_BLACK = 7
+const COLOR_BROWN = 8
+const COLOR_KHAKI = 9
+const COLOR_PINK = 10
+const COLOR_PURPLE = 11
+
+###############################################################################
+# DETERMINE NEXT STATE
+###############################################################################
+
+var CombustorState = 1
+var MixerState = 1
+var DisplayColour = COLOR_GREEN
+
+# If the water tank is full, stop combusting
+if OutputPressure > MAX_OUTPUT_PRESSURE
+    CombustorState = 0
+    DisplayColour = COLOR_ORANGE
+end
+
+# If the water is too hot, stop combusting
+if OutputTemperature > MAX_OUTPUT_TEMPERATURE
+    CombustorState = 0
+    DisplayColour = COLOR_RED
+end
+
+# If the waste output is full, stop combusting
+if WastePressure > MAX_WASTE_PRESSURE
+    CombustorState = 0
+    DisplayColour = COLOR_YELLOW
+end
+
+# # If there is too much fuel on the input, stop mixing
+# if InputPressure >= MIN_INPUT_PRESSURE
+#     MixerState = 0
+# end
+
+###############################################################################
+# APPLY NEXT STATE
+###############################################################################
+
+if MixerState == 1
+    EnableMixer()
+else
+    DisableMixer()
+end
+if CombustorState == 1
+    EnableCombustor()
+else
+    DisableCombustor()
+end
+
+###############################################################################
+# OUTPUT VALUES TO ATTACHED DISPLAYS
+###############################################################################
+
+bdseal StateDisplay UpdateStateDisplay()
+
+###############################################################################
+# FUNCTIONS
+###############################################################################
+
+function DisableCombustor
+    db.Mode = 0
+end
+
+function EnableCombustor
+    db.Mode = 0
+end
+
+function DisableMixer
+    InputMixer.On = 0
+end
+
+function EnableMixer
+    InputMixer.On = 1
+end
+
+function UpdateStateDisplay
+    StateDisplay.Color = DisplayColour
+end

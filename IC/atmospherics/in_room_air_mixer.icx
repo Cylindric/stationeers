@@ -1,0 +1,48 @@
+use aliases
+use loop
+
+alias OxygenVent d0
+alias NitrogenVent d1
+alias CO2Vent d2
+
+const SENSOR_GAS = -1252983604
+
+var TargetOxygenRatio = 0.27
+var TargetNitrogenRatio = 0.63
+var TargetCO2Ratio = 0.10
+var TargetPressure = 100
+
+var pressure = d(SENSOR_GAS).Pressure(Average)
+var oxygen = d(SENSOR_GAS).RatioOxygen(Average)
+var nitrogen = d(SENSOR_GAS).RatioNitrogen(Average)
+var co2 = d(SENSOR_GAS).RatioCarbonDioxide(Average)
+
+if pressure >= TargetPressure
+    StopAll()
+else
+
+    if oxygen > TargetOxygenRatio
+        OxygenVent.On = 0
+    else
+        OxygenVent.On = 1
+    end
+    if nitrogen > TargetNitrogenRatio
+        NitrogenVent.On = 0
+    else
+        NitrogenVent.On = 1
+    end
+    if co2 > TargetCO2Ratio
+        CO2Vent.On = 0
+    else
+        CO2Vent.On = 1
+    end
+
+end
+
+#############################
+
+function StopAll()
+    OxygenVent.On = 0
+    NitrogenVent.On = 0
+    CO2Vent.On = 0
+end

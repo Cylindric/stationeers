@@ -1,0 +1,48 @@
+use aliases
+use loop
+
+alias FillPump d0
+alias DrainPump d1
+alias InputSensor d2
+alias RadiatorSensor d3
+
+const MODE_COOLING = 0
+const MODE_HEATING = 1
+
+
+var mode = MODE_COOLING
+
+# Make sure that the system is always draining
+# faster than it's filling to prevent excessive
+# excitement.
+FillPump.Setting = 800
+DrainPump.Setting = 1000
+DrainPump.On = 1
+
+# Read the current state of the system
+var InputTemperature = d1.Temperature
+var RadiatorTemperature = d2.Temperature
+var RadiatorPressure = d2.Pressure
+
+# Assume that the radiator loop is enabled
+var pump_state = 1
+
+# Turn off the loop if it's too hot (in cooling mode)
+if mode == MODE_COOLING
+    if InputTemperature > RadiatorTemperature
+        pump_state = 0
+    end
+end
+
+# Turn off the loop if it's too cold (in heating mode)
+if mode == MODE_HEATING
+    if InputTemperature < RadiatorTemperature
+        pump_state = 0
+    end
+end
+
+# Turn off the loop if it's dangerously full
+
+
+# Apply the final pump state
+FillPump.On = pump_state

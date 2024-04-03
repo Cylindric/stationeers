@@ -1,0 +1,178 @@
+# STATUS CODES
+#
+#   1 - Furnace is cold; warming up
+#   2 - Furnace is hot; cooling down
+# 999 - Main switch off
+
+
+alias Button d0
+alias HashSelector d1
+alias Furnace d2
+alias HotFeed d3
+alias ColdFeed d4
+
+var Pmin
+var Pmax
+var Tmin
+var Tmax
+var Hash
+
+# These can be swapped if the switch is the other way up
+const SWITCH_ON = 1
+const SWITCH_OFF = 0
+
+var status
+
+start:
+# Read the value of the main control button
+var PowerSwitch = Button.Setting
+db.Setting = status
+
+# Read the value off the item-selector, and jump down to that item
+Pmax = 100000 # 100MPa
+Tmax = 100000 # 100kK
+
+var SelectedItem = HashSelector.Setting
+switch SelectedItem
+    case 0 # Basic
+        Hash = -1301215609
+        Pmin = 100 # 0.1MPa
+        # Pmax = 100000 # 100MPa
+        Tmin = 1000 # 1000K
+        # Tmax = 100000 # 100kK
+    end
+    case 1 # Steel
+        Hash = -654790771
+        Pmin = 1000 # 1MPa
+        # Pmax = 100000 # 100MPa
+        Tmin = 900 # 900K
+        # Tmax = 100000 # 100kK
+    end
+    case 2 # Invar
+        Hash = -297990285
+        Pmin = 18000 # 18MPa
+        Pmax = 20000 # 20MPa
+        Tmin = 1200 # 1.2kK
+        Tmax = 1500 # 1.5kK
+    end
+    case 3 # Solder
+        Hash = -82508479
+        Pmin = 1000 # 1MPa
+        # Pmax = 100000 # 100MPa
+        Tmin = 350 # 350K
+        Tmax = 550 # 550K
+    end
+    case 4 # Electrum
+        Hash = 502280180
+        Pmin = 800 # 0.8MPa
+        Pmax = 2400 # 2.4MPa
+        Tmin = 600 # 600K
+        # Tmax = 100000 # 100kK
+    end
+    case 5 # Constantan
+        Hash = 1058547521
+        Pmin = 20000 # 20MPa
+        # Pmax = 100000 # 100MPa
+        Tmin = 1000 # 1kK
+        Tmax = 10000 # 10kK
+    end
+    case 6 # Waspaloy
+        Hash = 156348098
+        Pmin = 50000 # 50MPa
+        # Pmax = 100000 # 100MPa
+        Tmin = 400 # 400K
+        Tmax = 800 # 800K
+    end
+    case 7 # Inconel
+        Hash = -787796599
+        Pmin = 23500 # 23.5MPa
+        Pmax = 24000 # 24MPa
+        Tmin = 600 # 600K
+        # Tmax = 100000 # 100kK
+    end
+    case 8 # Astroloy
+        Hash = 412924554
+        Pmin = 30000 # 30MPa
+        Pmax = 40000 # 40MPa
+        Tmin = 1000 # 1000K
+        # Tmax = 100000 # 100kK
+    end
+    case 9 # Hastelloy
+        Hash = 1579842814
+        Pmin = 25000 # 25MPa
+        Pmax = 30000 # 30MPa
+        Tmin = 905 # 950K
+        Tmax = 1000000 # 1000K
+    end
+    case 10 # Stellite
+        Hash = -1897868623
+        Pmin = 10000 # 10MPa
+        Pmax = 20000 # 20MPa
+        Tmin = 1800 # 1800K
+        # Tmax = 100000 # 100kK
+    end
+end
+
+status = 0
+if PowerSwitch == SWITCH_OFF
+    HotFeed.On = 0
+    ColdFeed.On = 0
+    Furnace.SettingOutput = 100
+    status = 999
+    j start
+end
+
+# Read the current state of the furnace
+var Tfurn = Furnace.Temperature
+var Pfurn = Furnace.Pressure
+var contents = Furnace.RecipeHash
+Furnace.SettingOutput = 0
+
+# If the furnace has our target ingot in it, we're done
+if contents == Hash
+    Furnace.Open = 1
+    status = status + 100
+else
+    Furnace.Open = 0
+end
+
+# If the furnace is too full, empty it
+if Pfurn > Pmax
+    status = status + 10
+    Furnace.SettingInput = 0
+    Furnace.SettingOutput = 20
+    ColdFeed.On = 0
+    HotFeed.On = 0
+    j start
+end
+
+
+if Pfurn < Pmin
+    # If the furnace is too empty, fill it
+    status = status + 20
+else
+    # If the furnace is full enough, stop filling it
+    status = status + 30
+    ColdFeed.On = 0
+    HotFeed.On = 0
+end
+
+# If the furnace is too cold, warm it up
+if Tfurn < Tmin
+    status = status + 1
+    Furnace.SettingInput = 10
+    HotFeed.On = 1
+    ColdFeed.On = 0
+end
+
+# If the furnace is too hot, cool it down
+if Tfurn > Tmax
+    status = status + 2
+    Furnace.SettingInput = 10
+    HotFeed.On = 0
+    ColdFeed.On = 1
+end
+
+db.Setting = status
+
+j start
