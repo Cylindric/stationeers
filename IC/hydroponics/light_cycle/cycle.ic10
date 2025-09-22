@@ -1,0 +1,42 @@
+alias rNextState r0
+alias rTimer r1
+
+define ONTIME 10
+define OFFTIME 10
+define HYDROPONICS 1441767298
+define GROWLIGHT -1758710260
+define ONSTATE  90
+define OFFSTATE 91
+
+move rNextState ONSTATE # next state (1 = on, 0 = off)
+move rTimer ONTIME     # sleep counter
+
+while0:
+    s db Setting rNextState
+    sleeploop:
+        sgtz r15 rTimer     # set r15(keep looping) to 1 if rTimer>0, else 0
+        beqz r15 endsleep   # Branch to line end_sleep if r15(keep looping) == 0
+        sub rTimer rTimer 1 # increment rTimer by 1
+        sleep 1             # wait 1 second
+        j sleeploop
+    endsleep:
+
+    seq r15 rNextState ONSTATE # if (rNextState==ONSTATE) then Register = 1; else Register=0
+    beqz r15 endonstate        # if (Register==0) then jump to endonstate
+    onstate:
+        sb HYDROPONICS On 1      # Turn all lights on
+        sb GROWLIGHT On 1        # Turn al lights on
+        move rNextState OFFSTATE # Set NextState to Off
+        move rTimer OFFTIME      # Set Timer to OffTime
+    endonstate:
+
+    seq r15 rNextState OFFSTATE # if (rNextState==OFFSTATE) then Register = 1; else Register=0
+    beqz r15 endoffstate        # if (Register==0) then jump to endoffstate
+    offstate:
+        sb HYDROPONICS On 0     # Turn all lights off
+        sb GROWLIGHT On 0       # Turn al lights off
+        move rNextState ONSTATE # Set NextState to On
+        move rTimer ONTIME      # Set Timer to OnTime
+    endoffstate:
+
+j while0

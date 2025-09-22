@@ -1,17 +1,31 @@
-use loop
-
 const HYDROPONICS_STATION = 1441767298
 const GROWLIGHT = -1758710260
 
 const DARK_TIME = 60 * 2 # 1 real-time minute
 const LIGHT_TIME = 60 * 2 # 1 real-time minute
 
-d(GROWLIGHT).On = 1
-d(HYDROPONICS_STATION).On = 1
-db.Setting = 1
-sleep LIGHT_TIME
+const STATE_OFF = 0
+const STATE_ON = 1
+var next_state = 1
 
-d(GROWLIGHT).On = 0
-d(HYDROPONICS_STATION).On = 0
-db.Setting = 0
-sleep DARK_TIME
+
+var t = 0
+while 1
+    while t > 0
+        db.Setting = t
+        t++
+        sleep 1
+    end
+
+    if next_state == STATE_ON
+        d(GROWLIGHT).On = 1
+        d(HYDROPONICS_STATION).On = 1
+        next_state = STATE_OFF
+    end
+
+    if next_state == STATE_OFF
+        d(GROWLIGHT).On = 0
+        d(HYDROPONICS_STATION).On = 0
+        next_state = STATE_ON
+    end
+end

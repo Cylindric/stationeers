@@ -1,9 +1,26 @@
+move r0 1
+move r1 0
+while0:
+beqz undefined while0exit
+while1:
+sgtz r15 r1
+beqz r15 while1exit
+s db Setting r1
+add r1 r1 1
+sleep 1
+j while1
+while1exit:
+seq r15 r0 1
+beqz r15 if0exit
 sb -1758710260 On 1
 sb 1441767298 On 1
-s db Setting 1
-sleep 120
+move r0 0
+if0exit:
+seq r15 r0 0
+beqz r15 if1exit
 sb -1758710260 On 0
 sb 1441767298 On 0
-s db Setting 0
-sleep 120
-j 0
+move r0 1
+if1exit:
+j while0
+while0exit:
