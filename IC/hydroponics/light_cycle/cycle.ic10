@@ -1,19 +1,20 @@
 alias rNextState r0
+alias rThisState r2
 alias rTimer r1
 
-define ONTIME 10
-define OFFTIME 10
+define ONTIME 120
+define OFFTIME 120
 define HYDROPONICS 1441767298
 define GROWLIGHT -1758710260
-define ONSTATE  90
-define OFFSTATE 91
+define ONSTATE 1
+define OFFSTATE 0
 
-move rNextState ONSTATE # next state (1 = on, 0 = off)
-move rTimer ONTIME     # sleep counter
+move rThisState ONSTATE # default start state is "On"
+move rTimer ONTIME      # default sleep counter is "OnTime"
 
-while0:
-    s db Setting rNextState
+loop:
     sleeploop:
+        s db Setting rTimer # Set the casing display to the current timer value
         sgtz r15 rTimer     # set r15(keep looping) to 1 if rTimer>0, else 0
         beqz r15 endsleep   # Branch to line end_sleep if r15(keep looping) == 0
         sub rTimer rTimer 1 # increment rTimer by 1
@@ -21,8 +22,8 @@ while0:
         j sleeploop
     endsleep:
 
-    seq r15 rNextState ONSTATE # if (rNextState==ONSTATE) then Register = 1; else Register=0
-    beqz r15 endonstate        # if (Register==0) then jump to endonstate
+    seq r15 rThisState ONSTATE   # if (rThisState==ONSTATE) then Register = 1; else Register=0
+    beqz r15 endonstate          # if (Register==0) then jump to endonstate
     onstate:
         sb HYDROPONICS On 1      # Turn all lights on
         sb GROWLIGHT On 1        # Turn al lights on
@@ -30,7 +31,7 @@ while0:
         move rTimer OFFTIME      # Set Timer to OffTime
     endonstate:
 
-    seq r15 rNextState OFFSTATE # if (rNextState==OFFSTATE) then Register = 1; else Register=0
+    seq r15 rThisState OFFSTATE # if (rThisState==OFFSTATE) then Register = 1; else Register=0
     beqz r15 endoffstate        # if (Register==0) then jump to endoffstate
     offstate:
         sb HYDROPONICS On 0     # Turn all lights off
@@ -39,4 +40,5 @@ while0:
         move rTimer ONTIME      # Set Timer to OnTime
     endoffstate:
 
-j while0
+    move rThisState rNextState
+j loop

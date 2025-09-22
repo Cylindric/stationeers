@@ -1,26 +1,37 @@
-move r0 1
-move r1 0
+alias next_state r0
+alias current_state r1
+alias t r2
+define HYDROPONICS_STATION 1441767298
+define GROWLIGHT -1758710260
+define DARK_TIME 120
+define LIGHT_TIME 120
+define STATE_OFF 0
+define STATE_ON 1
+move next_state STATE_ON
+move current_state STATE_ON
+move t 0
+start:
 while0:
-beqz undefined while0exit
-while1:
-sgtz r15 r1
-beqz r15 while1exit
-s db Setting r1
-add r1 r1 1
+sgtz r15 t
+beqz r15 while0exit
+s db Setting t
+sub t t 1
 sleep 1
-j while1
-while1exit:
-seq r15 r0 1
-beqz r15 if0exit
-sb -1758710260 On 1
-sb 1441767298 On 1
-move r0 0
-if0exit:
-seq r15 r0 0
-beqz r15 if1exit
-sb -1758710260 On 0
-sb 1441767298 On 0
-move r0 1
-if1exit:
 j while0
 while0exit:
+seq r15 current_state STATE_ON
+beqz r15 if0exit
+sb GROWLIGHT On 1
+sb HYDROPONICS_STATION On 1
+move next_state STATE_OFF
+move t DARK_TIME
+if0exit:
+seq r15 current_state STATE_OFF
+beqz r15 if1exit
+sb GROWLIGHT On 0
+sb HYDROPONICS_STATION On 0
+move next_state STATE_ON
+move t LIGHT_TIME
+if1exit:
+move current_state next_state
+j start
