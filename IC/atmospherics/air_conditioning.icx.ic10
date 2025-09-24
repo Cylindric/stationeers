@@ -8,11 +8,11 @@ move state 0
 loop:
 l CurrentTemperature TemperatureSensor Temperature
 l CurrentPressure TemperatureSensor Pressure
-sgt r15 CurrentTemperature 294.15
+sgt r15 CurrentTemperature 374.15
 beqz r15 if0exit
 move state 2
 if0exit:
-slt r15 CurrentTemperature 289.15
+slt r15 CurrentTemperature 324.15
 beqz r15 if1exit
 move state 1
 if1exit:

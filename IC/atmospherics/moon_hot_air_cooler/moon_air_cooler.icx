@@ -1,0 +1,71 @@
+# AIR CONDITIONING
+#
+# Keeps a gas tank at a constant temperature by turning on and off a radiator.
+# When the gas reaches the target temperature, the radiator is isolated and the gas in it is
+# dumped out into space.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0  - Gas Temperature sensor (either a Pipe Analyser or a Tank)
+#   D1* - A cooling device (or switch to enable several)
+#   D2* - A dump valve (or switch to enable several)
+#
+# It's possible to add an indicator pointing at this IC Housing for the following states:
+#
+#  0 - Idle
+#  1 - Cooling
+
+use aliases
+
+alias TemperatureSensor d0
+alias CoolingDevice d1
+alias DumpDevice d2
+
+const TARGET_TEMP = 20 + 274.15 # Tank gas will be cooled to below this temperature
+
+const STATE_IDLE = 0
+const STATE_COOLING = 1
+
+var state = STATE_IDLE
+
+loop:
+
+# Read current temperature
+var CurrentTemperature = TemperatureSensor.Temperature
+
+# Too hot
+if CurrentTemperature > TARGET_TEMP
+    state = STATE_COOLING
+end
+
+# Apply the state
+switch state
+    case STATE_IDLE
+        bdseal DumpDevice EnableDumping
+        bdseal CoolingDevice DisableCooling
+    end
+    case STATE_COOLING
+        bdseal DumpDevice DisableDumping
+        bdseal CoolingDevice EnableCooling
+    end
+end
+
+# Show the state on the housing
+db.Setting = state
+
+j loop
+
+function EnableCooling
+    CoolingDevice.On = 1
+end
+
+function DisableCooling
+    CoolingDevice.On = 0
+end
+
+function EnableDumping
+    DumpDevice.On = 1
+end
+
+function DisableDumping
+    DumpDevice.On = 0
+end

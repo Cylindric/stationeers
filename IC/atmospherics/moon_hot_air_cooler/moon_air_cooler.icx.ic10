@@ -1,0 +1,33 @@
+alias state r0
+alias CurrentTemperature r1
+alias TemperatureSensor d0
+alias CoolingDevice d1
+alias DumpDevice d2
+move state 0
+loop:
+l CurrentTemperature TemperatureSensor Temperature
+sgt r15 CurrentTemperature 294.15
+beqz r15 if0exit
+move state 1
+if0exit:
+brne state 0 3
+bdseal DumpDevice EnableDumping
+bdseal CoolingDevice DisableCooling
+brne state 1 3
+bdseal DumpDevice DisableDumping
+bdseal CoolingDevice EnableCooling
+s db Setting state
+j loop
+jr 13
+EnableCooling:
+s CoolingDevice On 1
+j ra
+DisableCooling:
+s CoolingDevice On 0
+j ra
+EnableDumping:
+s DumpDevice On 1
+j ra
+DisableDumping:
+s DumpDevice On 0
+j ra

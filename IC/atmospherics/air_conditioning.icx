@@ -20,8 +20,8 @@ alias TemperatureSensor d0
 alias CoolingDevice d1
 alias HeatingDevice d2
 
-const LOW_TEMP = 15 + 274.15
-const HIGH_TEMP = 20 + 274.15
+const LOW_TEMP = 50 + 274.15
+const HIGH_TEMP = 100 + 274.15
 const MAX_PRESSURE = 30000
 
 const STATE_IDLE = 0
