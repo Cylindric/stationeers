@@ -7,8 +7,11 @@ move state 0
 loop:
 l CurrentTemperature TemperatureSensor Temperature
 sgt r15 CurrentTemperature 294.15
-beqz r15 if0exit
+beqz r15 if0else
 move state 1
+j if0exit
+if0else:
+move state 0
 if0exit:
 brne state 0 3
 bdseal DumpDevice EnableDumping

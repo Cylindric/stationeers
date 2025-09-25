@@ -24,6 +24,8 @@ const TARGET_TEMP = 20 + 274.15 # Tank gas will be cooled to below this temperat
 
 const STATE_IDLE = 0
 const STATE_COOLING = 1
+const COLOR_BLUE = 0
+const COLOR_RED = 4
 
 var state = STATE_IDLE
 
@@ -35,6 +37,8 @@ var CurrentTemperature = TemperatureSensor.Temperature
 # Too hot
 if CurrentTemperature > TARGET_TEMP
     state = STATE_COOLING
+else
+    state = STATE_IDLE
 end
 
 # Apply the state
