@@ -8,6 +8,7 @@
 #   D0  - Gas Temperature sensor (either a Pipe Analyser or a Tank)
 #   D1* - A cooling device (or switch to enable several)
 #   D2* - A dump valve (or switch to enable several)
+#   D3* - An output Valve (to vent the cooled gas to further processing)
 #
 # It's possible to add an indicator pointing at this IC Housing for the following states:
 #
@@ -19,6 +20,7 @@ use aliases
 alias TemperatureSensor d0
 alias CoolingDevice d1
 alias DumpDevice d2
+alias OutputDevice d3
 
 const TARGET_TEMP = 20 + 274.15 # Tank gas will be cooled to below this temperature
 
@@ -45,10 +47,12 @@ end
 switch state
     case STATE_IDLE
         bdseal DumpDevice EnableDumping
+        bdseal OutputDevice EnableOutput
         bdseal CoolingDevice DisableCooling
     end
     case STATE_COOLING
         bdseal DumpDevice DisableDumping
+        bdseal OutputDevice DisableOutput
         bdseal CoolingDevice EnableCooling
     end
 end
@@ -72,4 +76,12 @@ end
 
 function DisableDumping
     DumpDevice.On = 0
+end
+
+function EnableOutput
+    OutputDevice.On = 1
+end
+
+function DisableOutput
+    OutputDevice.On = 0
 end

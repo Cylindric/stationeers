@@ -32,7 +32,7 @@ alias OverPressureIndicator d3
 alias UnderPressureIndicator d4
 alias ChillerValve d5
 
-const MaxPressure = 9000.0
+const MaxPressure = 50000.0 # Small tank max is 60,000kPa
 const MinPressure = 8500.0
 const ChillMinTemperature = 19 + 274.15
 const ChillMaxTemperature = 21 + 274.15

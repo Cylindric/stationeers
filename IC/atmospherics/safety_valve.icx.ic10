@@ -8,7 +8,7 @@ alias UnderPressureIndicator d4
 alias ChillerValve d5
 l CurrentPressure PressureSensor Pressure
 l CurrentTemperature PressureSensor Temperature
-sgt r15 CurrentPressure 9000.0
+sgt r15 CurrentPressure 50000.0
 beqz r15 if0exit
 bdseal DumpValve EnableDumpValve
 bdseal FeedValve DisableFeedValve
