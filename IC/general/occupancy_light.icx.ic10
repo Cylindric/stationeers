@@ -1,0 +1,17 @@
+alias occupied r0
+alias state r1
+lb occupied 322782515 Quantity Sum
+move state 0
+sgtz r15 occupied
+beqz r15 if0exit
+move state 1
+if0exit:
+sb 1847265835 On state
+sb 555215790 On state
+sb 1592905386 On state
+sb 1436121888 On state
+sb 1514476632 On state
+sb -1306415132 On state
+sb -1860064656 On state
+sleep 1
+j 0

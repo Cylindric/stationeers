@@ -1,63 +1,52 @@
-alias input_ok r0
-alias PremixPressure r1
-alias AirPressure r2
-alias O2Pressure r3
-alias N2Pressure r4
-alias PreMixPressureSensor d0
-alias PreMixerValve d1
-alias OxygenSensor d2
-alias AirMixPressureSensor d3
-alias AirMixerValve d4
-alias NitrogenSensor d5
-l PremixPressure PreMixPressureSensor Pressure
-l AirPressure AirMixPressureSensor Pressure
-move O2Pressure 99999
-move N2Pressure 99999
-bdseal OxygenSensor ReadOxygenPressure
-bdseal NitrogenSensor ReadNitrogenPressure
-sgt r15 O2Pressure 500
-sgt r14 N2Pressure 501
+l r1 d0 Pressure
+l r2 d3 Pressure
+move r3 99999
+move r4 99999
+bdseal d2 ReadOxygenPressure
+bdseal d5 ReadNitrogenPressure
+sgt r15 r3 500
+sgt r14 r4 501
 and r13 r15 r14
 beqz r13 if0else
-move input_ok 1
+move r0 1
 s db Setting 4
 j if0exit
 if0else:
-move input_ok 0
+move r0 0
 s db Setting 5
 if0exit:
-seqz r15 input_ok
+seqz r15 r0
 beqz r15 if1exit
-s PreMixerValve On 0
+s d1 On 0
 s db Setting 1
 if1exit:
-sgt r15 PremixPressure 8500.0
+sgt r15 r1 8500.0
 beqz r15 if2exit
-s PreMixerValve On 0
+s d1 On 0
 s db Setting 2
 if2exit:
-seq r15 input_ok 1
-slt r14 PremixPressure 8500.0
+seq r15 r0 1
+slt r14 r1 8500.0
 and r13 r15 r14
 beqz r13 if3exit
-s PreMixerValve On 1
+s d1 On 1
 s db Setting 3
 if3exit:
-sgt r15 AirPressure 8500.0
+sgt r15 r2 8500.0
 beqz r15 if4exit
-s AirMixerValve On 0
+s d4 On 0
 s db Setting 6
 if4exit:
-slt r15 AirPressure 8500.0
+slt r15 r2 8500.0
 beqz r15 if5exit
-s AirMixerValve On 1
+s d4 On 1
 s db Setting 7
 if5exit:
 yield
 j 0
 ReadOxygenPressure:
-l O2Pressure OxygenSensor Pressure
+l r3 d2 Pressure
 j ra
 ReadNitrogenPressure:
-l N2Pressure NitrogenSensor Pressure
+l r4 d5 Pressure
 j ra

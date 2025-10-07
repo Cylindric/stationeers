@@ -1,0 +1,108 @@
+# ROCKET FUEL LOADER
+#
+# This code can be used to control the mixing of the three input
+# gasses into a safe breathable atmosphere.
+# Mixing is disabled once MIN_PRESSURE is reached.
+#
+# A standard SafetyValve should be attached to both the PreMix and Air
+# systems to protect against over-pressure.
+# The system will try to preserve an amount of Oxygen and Nitrogen so it
+# doesn't all get converted to Air. This is only active if a pressure
+# sensor (Tank or Analyser) is attached to D2/D5.
+#
+# NOTE: this controller does not take the input gas temperature into account,
+#       so if they are very different, the ratios won't be precise.
+#
+# Attach the following devices to the IC Socket (*optional):
+#   D0 - Input pipe pressure sensor
+#   D1 - Pump to fill the buffer tank
+#   D2 - Buffer tank pressure sensor
+#   D3 - Pump to fill the rocket
+#   D4 - Output pipe pressure sensor (to rocket)
+#
+#   INPUT_PIPE -> FEED_PUMP -> BUFFER_TANK -> LOAD_PUMP -> ROCKET_PIPE
+#       D0            D1            D2            D3            D4
+
+use aliases
+use loop
+
+alias InputPressureSensor d0
+alias FeedPump d1
+alias BufferPressureSensor d2
+alias OutputPump d3
+alias OutputPressureSensor d4
+
+const BUFFER_PRESSURE = 45000
+const OUTPUT_PRESSURE = 45000
+const MIN_INPUT_PRESSURE = 500 # Keep a minimum pressure in the input pipe to avoid running out of fuel
+
+# Read current pressure value
+var input_ok
+var InputPressure = 99999
+var BufferPressure = 99999
+var OutputPressure = 99999
+bdseal InputPressureSensor ReadInputPressure
+bdseal OutputPressureSensor ReadOutputPressure
+bdseal BufferPressureSensor ReadBufferPressure
+
+#################
+### BUFFER STAGE
+#################
+
+# Make sure there's enough supply gas on the input side
+if InputPressure > MIN_INPUT_PRESSURE
+    input_ok = 1
+    db.Setting = 4
+else
+    input_ok = 0
+    db.Setting = 5
+end
+
+# If there is not enough supply gas, stop mixing
+if input_ok == 0
+    FeedPump.On = 0
+    db.Setting = 1
+end
+
+# If there is enough in the buffer, stop mixing
+if BufferPressure > BUFFER_PRESSURE
+    FeedPump.On = 0
+    db.Setting = 2
+end
+
+# If there is not enough Buffer, enable mixing
+if input_ok == 1 && BufferPressure < BUFFER_PRESSURE
+    FeedPump.On = 1
+    db.Setting = 3
+end
+
+###############
+# LOADING STAGE
+###############
+
+# If there is enough Output, stop mixing
+if OutputPressure > OUTPUT_PRESSURE
+    OutputPump.On = 0
+    db.Setting = 6
+end
+
+# If there is not enough Output, enable mixing
+if OutputPressure <= OUTPUT_PRESSURE
+    OutputPump.On = 1
+    db.Setting = 7
+end
+
+yield
+
+###############################################################################
+function ReadInputPressure
+    InputPressure = InputPressureSensor.Pressure
+end
+
+function ReadOutputPressure
+    OutputPressure = OutputPressureSensor.Pressure
+end
+
+function ReadBufferPressure
+    BufferPressure = BufferPressureSensor.Pressure
+end

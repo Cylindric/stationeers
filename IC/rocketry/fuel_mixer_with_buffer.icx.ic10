@@ -1,0 +1,62 @@
+alias input_ok r0
+alias InputPressure r1
+alias BufferPressure r2
+alias OutputPressure r3
+alias InputPressureSensor d0
+alias FeedPump d1
+alias BufferPressureSensor d2
+alias OutputPump d3
+alias OutputPressureSensor d4
+move InputPressure 99999
+move BufferPressure 99999
+move OutputPressure 99999
+bdseal InputPressureSensor ReadInputPressure
+bdseal OutputPressureSensor ReadOutputPressure
+bdseal BufferPressureSensor ReadBufferPressure
+sgt r15 InputPressure 500
+beqz r15 if0else
+move input_ok 1
+s db Setting 4
+j if0exit
+if0else:
+move input_ok 0
+s db Setting 5
+if0exit:
+seqz r15 input_ok
+beqz r15 if1exit
+s FeedPump On 0
+s db Setting 1
+if1exit:
+sgt r15 BufferPressure 45000
+beqz r15 if2exit
+s FeedPump On 0
+s db Setting 2
+if2exit:
+seq r15 input_ok 1
+slt r14 BufferPressure 45000
+and r13 r15 r14
+beqz r13 if3exit
+s FeedPump On 1
+s db Setting 3
+if3exit:
+sgt r15 OutputPressure 45000
+beqz r15 if4exit
+s OutputPump On 0
+s db Setting 6
+if4exit:
+sle r15 OutputPressure 45000
+beqz r15 if5exit
+s OutputPump On 1
+s db Setting 7
+if5exit:
+yield
+j 0
+ReadInputPressure:
+l InputPressure InputPressureSensor Pressure
+j ra
+ReadOutputPressure:
+l OutputPressure OutputPressureSensor Pressure
+j ra
+ReadBufferPressure:
+l BufferPressure BufferPressureSensor Pressure
+j ra
